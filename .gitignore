@@ -1,0 +1,13 @@
+/bin/
+/target/
+.classpath
+.project
+.settings
+.metadata
+*.jardesc
+.idea
+.recommenders
+*.iml
+*.eml
+.DS_Store
+META-INF
