@@ -3,6 +3,8 @@ A modern implementation of Fanciful
 
 This library aims to completely replace [Fanciful](https://bukkit.org/threads/lib-fanciful-pleasant-chat-message-formatting.195148/), which sadly has stopped being updated. I figured I'd take a stab at re-creating it, and even making it better.
 
+The best thing about this library? It's only a [single class file](https://github.com/Rayzr522/JSONMessage/blob/master/src/main/java/com/perceivedev/jsonmessage/JSONMessage.java), so just drag and drop it.
+
 ## Usage
 This library is extremely easy to use! It uses a nearly identical system as Fanciful. Example:
     
@@ -20,6 +22,8 @@ Here's a more complicated example, showing the true power of JSONMessage:
                  .openURL("http://www.youtube.com/");
                  
 This example creates a message in two parts, one gold, one blue, and gives the second part a tooltip as well as an action! When you click on this, it will open YouTube.
+
+*More to this coming soon...*
 
 ## Methods overview
 
@@ -42,6 +46,3 @@ toString() | Converts the JSONMessage to a String, useable in things like `/tell
 ### Method Notes
 - `color(ChatColor)` and `style(ChatColor)` both use ChatColors but require different types. Attempting to pass the wrong type in (e.g. doing `style(ChatColor.GREEN)`, or doing `color(ChatColor.BOLD)`) will result in an IllegalArgumentException.
 - `tooltip(JSONMessage)` takes another JSONMessage instance, allowing you to create fancy text for your tooltips.
-
-
-*More to this coming soon...*
