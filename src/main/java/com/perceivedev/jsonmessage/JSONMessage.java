@@ -124,6 +124,17 @@ public class JSONMessage {
     }
 
     /**
+     * Adds a style to the current message part.
+     * 
+     * @param style the style to add
+     * @return this
+     */
+    public JSONMessage style(ChatColor style) {
+        last().addStyle(style);
+        return this;
+    }
+
+    /**
      * Makes the text run a command.
      * 
      * @param cmd the command to run
