@@ -21,4 +21,27 @@ Here's a more complicated example, showing the true power of JSONMessage:
                  
 This example creates a message in two parts, one gold, one blue, and gives the second part a tooltip as well as an action! When you click on this, it will open YouTube.
 
+## Methods overview
+
+Method | Description
+------ | -----------
+create(String) | Creates a new JSONMessage with the given text as a starting point
+color(ChatColor) | Sets the color of the current message part
+style(ChatColor) | Adds a style to the current message part
+runCommand(String) | ClickEvent: Runs the given command
+suggestCommand(String) |  ClickEvent: Suggests the given command by inserting it into the player's chat area
+openURL(String) | ClickEvent: Opens the given URL
+changePage(int) | ClickEvent: changes the page of a book to the given page
+tooltip(String) | HoverEvent: shows the given text
+tooltip(JSONMessage) | HoverEvent: shows the given JSON as text (works just like the rest of this system)
+achievement(String) | HoverEvent: shows an achievement with the given ID
+then(String) | Adds another part to the message
+toJSON() | Converts the JSONMessage to a `JsonObject` (Google's Gson library, comes with Bukkit)
+toString() | Converts the JSONMessage to a String, useable in things like `/tellraw`. This is an alias of `toJSON().toString()`
+
+### Method Notes
+- `color(ChatColor)` and `style(ChatColor)` both use ChatColors but require different types. Attempting to pass the wrong type in (e.g. doing `style(ChatColor.GREEN)`, or doing `color(ChatColor.BOLD)`) will result in an IllegalArgumentException.
+- `tooltip(JSONMessage)` takes another JSONMessage instance, allowing you to create fancy text for your tooltips.
+
+
 *More to this coming soon...*
