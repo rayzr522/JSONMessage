@@ -17,7 +17,7 @@ public class Test {
     public static void main(String[] args) {
 
         JSONMessage hoverText = JSONMessage.create("This is green text!").color(ChatColor.GREEN).then("\nHello world");
-        JSONMessage chat = JSONMessage.create("Hello! ").color(ChatColor.GREEN).then("What's up?").color(ChatColor.BLUE).tooltip(hoverText);
+        JSONMessage chat = JSONMessage.create("Hello! ").color(ChatColor.GREEN).then("What's up?").style(ChatColor.BOLD).color(ChatColor.BLUE).tooltip(hoverText);
 
         System.out.println(chat.toString());
 

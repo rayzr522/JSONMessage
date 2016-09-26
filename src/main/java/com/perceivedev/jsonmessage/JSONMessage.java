@@ -338,7 +338,7 @@ public class JSONMessage {
          * @param style the style to add
          */
         public void addStyle(ChatColor style) {
-            if (!color.isFormat()) {
+            if (!style.isFormat()) {
                 throw new IllegalArgumentException(color.name() + " is not a style!");
             }
             styles.add(style);
