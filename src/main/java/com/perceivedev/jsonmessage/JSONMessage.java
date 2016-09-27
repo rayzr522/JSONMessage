@@ -513,7 +513,7 @@ public class JSONMessage {
         private static Class<?>       craftPlayer;
 
         private static Constructor<?> chatComponentText;
-        private static Constructor<?> packetPlayOutChat;
+        private static Class<?>       packetPlayOutChat;
 
         private static Field          connection;
         private static Method         getHandle;
@@ -548,7 +548,7 @@ public class JSONMessage {
                         stringToChat = getClass("{nms}.ChatSerializer").getMethod("a", String.class);
                     }
 
-                    packetPlayOutChat = getClass("{nms}.PacketPlayOutChat").getConstructor();
+                    packetPlayOutChat = getClass("{nms}.PacketPlayOutChat");
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -633,7 +633,7 @@ public class JSONMessage {
 
         public static void set(String field, Object o, Object v) {
             try {
-                Field f = o.getClass().getField(field);
+                Field f = o.getClass().getDeclaredField(field);
                 f.setAccessible(true);
                 f.set(o, v);
             } catch (Exception e) {
