@@ -60,13 +60,13 @@ Method | Description
 `create(String)` | Creates a new JSONMessage with the given text as a starting point
 `color(ChatColor)` | Sets the color of the current message part
 `style(ChatColor)` | Adds a style to the current message part
-`runCommand(String)` | ClickEvent: Runs the given command
-`suggestCommand(String)` |  ClickEvent: Suggests the given command by inserting it into the player's chat area
-`openURL(String)` | ClickEvent: Opens the given URL
-`changePage(int)` | ClickEvent: changes the page of a book to the given page
-`tooltip(String)` | HoverEvent: shows the given text
-`tooltip(JSONMessage)` | HoverEvent: shows the given JSON as text (works just like the rest of this system)
-`achievement(String)` | HoverEvent: shows an achievement with the given ID
+`runCommand(String)` | `ClickEvent`: Runs the given command
+`suggestCommand(String)` |  `ClickEvent`: Suggests the given command by inserting it into the player's chat area
+`openURL(String)` | `ClickEvent`: Opens the given URL
+`changePage(int)` | `ClickEvent`: changes the page of a book to the given page
+`tooltip(String)` | `HoverEvent`: shows the given text
+`tooltip(JSONMessage)` | `HoverEvent`: shows the given JSON as text (works just like the rest of this system)
+`achievement(String)` | `HoverEvent`: shows an achievement with the given ID
 `then(String)` | Adds another part to the message
 `bar(int)` | Creates a horizontal divider bar of the given length
 `bar()` | Creates a horizontal divider bar 53 characters long. This is perfect for the default chat window width
