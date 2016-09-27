@@ -3,11 +3,16 @@
  */
 package com.perceivedev.jsonmessage;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
@@ -110,6 +115,12 @@ public class JSONMessage {
     @Override
     public String toString() {
         return toJSON().toString();
+    }
+
+    public void send(Player... players) {
+
+        ReflectionHelper.sendPacket(ReflectionHelper.createTextPacket(toString()), players);
+
     }
 
     /**
@@ -493,6 +504,154 @@ public class JSONMessage {
          */
         public static MessageEvent showAchievement(String id) {
             return new MessageEvent("show_achievement", id);
+        }
+
+    }
+
+    private static class ReflectionHelper {
+
+        private static Class<?>       craftPlayer;
+
+        private static Constructor<?> chatComponentText;
+        private static Constructor<?> packetPlayOutChat;
+
+        private static Field          connection;
+        private static Method         getHandle;
+        private static Method         sendPacket;
+        private static Method         stringToChat;
+
+        private static String         version;
+
+        private static boolean        SETUP = false;
+
+        static {
+
+            if (!SETUP) {
+
+                String[] split = Bukkit.getServer().getClass().getPackage().getName().split("\\.");
+                version = split[split.length - 1];
+
+                try {
+
+                    SETUP = true;
+
+                    craftPlayer = getClass("{obc}.entity.CraftPlayer");
+                    getHandle = craftPlayer.getMethod("getHandle");
+                    connection = getHandle.getReturnType().getField("playerConnection");
+                    sendPacket = connection.getType().getMethod("sendPacket", getClass("{nms}.Packet"));
+
+                    chatComponentText = getClass("{nms}.ChatComponentText").getConstructor(String.class);
+
+                    if (getVersion() > 7) {
+                        stringToChat = getClass("{nms}.IChatBaseComponent$ChatSerializer").getMethod("a", String.class);
+                    } else {
+                        stringToChat = getClass("{nms}.ChatSerializer").getMethod("a", String.class);
+                    }
+
+                    packetPlayOutChat = getClass("{nms}.PacketPlayOutChat").getConstructor();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    SETUP = false;
+                }
+
+            }
+
+        }
+
+        public static void sendPacket(Object packet, Player... players) {
+            if (!SETUP) {
+                throw new IllegalStateException("ReflectionHelper is not set up!");
+            }
+            if (packet == null) {
+                return;
+            }
+
+            for (Player player : players) {
+                try {
+                    sendPacket.invoke(connection.get(getHandle.invoke(player)), packet);
+                } catch (Exception e) {
+                    System.err.println("Failed to send packet");
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
+        public static Object createTextPacket(String message) {
+            if (!SETUP) {
+                throw new IllegalStateException("ReflectionHelper is not set up!");
+            }
+            try {
+                Object packet = packetPlayOutChat.newInstance();
+                set("a", packet, fromJson(message));
+                set("b", packet, (byte) 1);
+                return packet;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+
+        public static Object componentText(String msg) {
+            if (!SETUP) {
+                throw new IllegalStateException("ReflectionHelper is not set up!");
+            }
+            try {
+                return chatComponentText.newInstance(msg);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+
+        public static Object fromJson(String json) {
+            if (!SETUP) {
+                throw new IllegalStateException("ReflectionHelper is not set up!");
+            }
+            if (!json.trim().startsWith("{")) {
+                return componentText(json);
+            }
+
+            try {
+                return stringToChat.invoke(null, json);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+
+        public static Class<?> getClass(String path) throws ClassNotFoundException {
+            if (!SETUP) {
+                throw new IllegalStateException("ReflectionHelper is not set up!");
+            }
+            return Class.forName(path.replace("{nms}", "net.minecraft.server." + version).replace("{obc}", "org.bukkit.craftbukkit." + version));
+        }
+
+        public static void set(String field, Object o, Object v) {
+            try {
+                Field f = o.getClass().getField(field);
+                f.setAccessible(true);
+                f.set(o, v);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        public static int getVersion() {
+            if (!SETUP) {
+                throw new IllegalStateException("ReflectionHelper is not set up!");
+            }
+            try {
+                return Integer.parseInt(version.split("_")[1]);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                return 10;
+            }
+
         }
 
     }
