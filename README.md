@@ -72,8 +72,7 @@ bar(int) | Creates a horizontal divider bar of the given length
 bar() | Creates a horizontal divider bar 53 characters long. This is perfect for the default chat window width
 newline() | Inserts a newline. It really isn't necessary, you can just use `\n` if you want
 toJSON() | Converts the JSONMessage to a `JsonObject` (Google's Gson library, comes with Bukkit)
-toString() | Converts the JSONMessage to a String, useable in things like `/tellraw`. This is an alias of
-`toJSON().toString()`
+toString() | Converts the JSONMessage to a String, useable in things like `/tellraw`. This is an alias of `toJSON().toString()`
 send(Player...) | Sends the JSONMessage to one or many players
 
 ### Method Notes
