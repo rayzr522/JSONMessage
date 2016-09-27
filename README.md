@@ -26,12 +26,12 @@ This example creates a message in two parts, one gold, one blue, and gives the s
 One thing to note about tooltips is that they *themselves* can actually take a JSONMessage as a parameter:
 
     JSONMessage.create("This has a fancy tooltip!")
-               .tooltip(JSONMessage.create("Green text!")
-                                     .color(ChatColor.GREEN)
-                                     .style(ChatColor.BOLD)
-                                   .then("\nUse the newline character to\nadd lines to the tooltip")
-                                     .color(ChatColor.YELLOW))
-               .color(ChatColor.GOLD);
+                 .color(ChatColor.GOLD);
+                 .tooltip(JSONMessage.create("Green text!")
+                                       .color(ChatColor.GREEN)
+                                       .style(ChatColor.BOLD)
+                                     .then("\nUse the newline character to\nadd lines to the tooltip")
+                                       .color(ChatColor.YELLOW))
                
 You can also make text which runs commands when you click on it:
 
