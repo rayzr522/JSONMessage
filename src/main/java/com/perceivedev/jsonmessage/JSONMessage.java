@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.gson.JsonArray;
@@ -75,6 +76,13 @@ public class JSONMessage {
      */
     public static JSONMessage create(String text) {
         return new JSONMessage(text);
+    }
+    
+    /**
+     * Creates a new JSONChat object
+     */
+    public static JSONMessage create() {
+        return create("");
     }
 
     /**
@@ -242,6 +250,35 @@ public class JSONMessage {
     public JSONMessage then(MessagePart nextPart) {
         parts.add(nextPart);
         return this;
+    }
+
+    /**
+     * Adds a horizontal bar to the message of the given length
+     * 
+     * @param length the length of the horizontal bar
+     * @return this
+     */
+    public JSONMessage bar(int length) {
+        return then(Strings.repeat("-", length)).color(ChatColor.DARK_GRAY).style(ChatColor.STRIKETHROUGH);
+    }
+
+    /**
+     * Adds a horizontal bar to the message that's 53 characters long. This is
+     * the default width of the player's chat window.
+     * 
+     * @return this
+     */
+    public JSONMessage bar() {
+        return bar(53);
+    }
+    
+    /**
+     * Adds a blank line to the message
+     * 
+     * @return this
+     */
+    public JSONMessage newline() {
+        return then("\n");
     }
 
     ///////////////////////////
