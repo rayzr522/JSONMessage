@@ -23,7 +23,35 @@ Here's a more complicated example, showing the true power of JSONMessage:
                  
 This example creates a message in two parts, one gold, one blue, and gives the second part a tooltip as well as an action! When you click on this, it will open YouTube.
 
-*More to this coming soon...*
+One thing to note about tooltips is that they *themselves* can actually take a JSONMessage as a parameter:
+
+    JSONMessage.create("This has a fancy tooltip!")
+               .tooltip(JSONMessage.create("Green text!")
+                                     .color(ChatColor.GREEN)
+                                     .style(ChatColor.BOLD)
+                                   .then("\nUse the newline character to\nadd lines to the tooltip")
+                                     .color(ChatColor.YELLOW))
+               .color(ChatColor.GOLD);
+               
+You can also make text which runs commands when you click on it:
+
+    JSONMessage.create("Click")
+                 .color(ChatColor.GOLD)
+               .then(" here ")
+                 .color(ChatColor.RED)
+                 .runCommand("/warp spawn")
+               .then("to go to spawn")
+                 .color(ChatColor.GOLD);
+                 
+To send a JSONMessage, it's quite simple:
+
+    JSONMessage.create("Hello!")
+                 .tooltip("World!")
+               .send(player);
+                 
+You can pass as many players as you want into `send`, meaning you could send this to huge groups of players.
+
+If you want to see all the available methods, you can find them just below this.
 
 ## Methods overview
 
@@ -41,7 +69,9 @@ tooltip(JSONMessage) | HoverEvent: shows the given JSON as text (works just like
 achievement(String) | HoverEvent: shows an achievement with the given ID
 then(String) | Adds another part to the message
 toJSON() | Converts the JSONMessage to a `JsonObject` (Google's Gson library, comes with Bukkit)
-toString() | Converts the JSONMessage to a String, useable in things like `/tellraw`. This is an alias of `toJSON().toString()`
+toString() | Converts the JSONMessage to a String, useable in things like `/tellraw`. This is an alias of
+`toJSON().toString()`
+send(Player...) | Sends the JSONMessage to one or many players
 
 ### Method Notes
 - `color(ChatColor)` and `style(ChatColor)` both use ChatColors but require different types. Attempting to pass the wrong type in (e.g. doing `style(ChatColor.GREEN)`, or doing `color(ChatColor.BOLD)`) will result in an IllegalArgumentException.
