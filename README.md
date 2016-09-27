@@ -68,6 +68,8 @@ tooltip(String) | HoverEvent: shows the given text
 tooltip(JSONMessage) | HoverEvent: shows the given JSON as text (works just like the rest of this system)
 achievement(String) | HoverEvent: shows an achievement with the given ID
 then(String) | Adds another part to the message
+bar(int) | Creates a horizontal divider bar of the given length
+bar() | Creates a horizontal divider bar 53 characters long. This is perfect for the default chat window width
 toJSON() | Converts the JSONMessage to a `JsonObject` (Google's Gson library, comes with Bukkit)
 toString() | Converts the JSONMessage to a String, useable in things like `/tellraw`. This is an alias of
 `toJSON().toString()`
