@@ -57,23 +57,23 @@ If you want to see all the available methods, you can find them just below this.
 
 Method | Description
 ------ | -----------
-create(String) | Creates a new JSONMessage with the given text as a starting point
-color(ChatColor) | Sets the color of the current message part
-style(ChatColor) | Adds a style to the current message part
-runCommand(String) | ClickEvent: Runs the given command
-suggestCommand(String) |  ClickEvent: Suggests the given command by inserting it into the player's chat area
-openURL(String) | ClickEvent: Opens the given URL
-changePage(int) | ClickEvent: changes the page of a book to the given page
-tooltip(String) | HoverEvent: shows the given text
-tooltip(JSONMessage) | HoverEvent: shows the given JSON as text (works just like the rest of this system)
-achievement(String) | HoverEvent: shows an achievement with the given ID
-then(String) | Adds another part to the message
-bar(int) | Creates a horizontal divider bar of the given length
-bar() | Creates a horizontal divider bar 53 characters long. This is perfect for the default chat window width
-newline() | Inserts a newline. It really isn't necessary, you can just use `\n` if you want
-toJSON() | Converts the JSONMessage to a `JsonObject` (Google's Gson library, comes with Bukkit)
-toString() | Converts the JSONMessage to a String, useable in things like `/tellraw`. This is an alias of `toJSON().toString()`
-send(Player...) | Sends the JSONMessage to one or many players
+`create(String)` | Creates a new JSONMessage with the given text as a starting point
+`color(ChatColor)` | Sets the color of the current message part
+`style(ChatColor)` | Adds a style to the current message part
+`runCommand(String)` | ClickEvent: Runs the given command
+`suggestCommand(String)` |  ClickEvent: Suggests the given command by inserting it into the player's chat area
+`openURL(String)` | ClickEvent: Opens the given URL
+`changePage(int)` | ClickEvent: changes the page of a book to the given page
+`tooltip(String)` | HoverEvent: shows the given text
+`tooltip(JSONMessage)` | HoverEvent: shows the given JSON as text (works just like the rest of this system)
+`achievement(String)` | HoverEvent: shows an achievement with the given ID
+`then(String)` | Adds another part to the message
+`bar(int)` | Creates a horizontal divider bar of the given length
+`bar()` | Creates a horizontal divider bar 53 characters long. This is perfect for the default chat window width
+`newline()` | Inserts a newline. It really isn't necessary, you can just use `\n` if you want
+`toJSON()` | Converts the JSONMessage to a `JsonObject` (Google's Gson library, comes with Bukkit)
+`toString()` | Converts the JSONMessage to a String, useable in things like `/tellraw`. This is an alias of `toJSON().toString()`
+`send(Player...)` | Sends the JSONMessage to one or many players
 
 ### Method Notes
 - `color(ChatColor)` and `style(ChatColor)` both use ChatColors but require different types. Attempting to pass the wrong type in (e.g. doing `style(ChatColor.GREEN)`, or doing `color(ChatColor.BOLD)`) will result in an IllegalArgumentException.
