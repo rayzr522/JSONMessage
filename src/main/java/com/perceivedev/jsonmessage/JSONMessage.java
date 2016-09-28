@@ -86,6 +86,17 @@ public class JSONMessage {
     }
 
     /**
+     * Sends an action bar message
+     * 
+     * @param players the players you want to send it to
+     */
+    public static void actionbar(String message, Player... players) {
+
+        ReflectionHelper.sendPacket(ReflectionHelper.createActionbarPacket(ChatColor.translateAlternateColorCodes('&', message)), players);
+
+    }
+
+    /**
      * @return The latest {@link MessagePart}
      * @throws ArrayIndexOutOfBoundsException If {@code parts.size() <= 0}.
      */
@@ -117,12 +128,23 @@ public class JSONMessage {
     }
 
     /**
-     * Converts this JSONChat object to a String representation of the JSON.
+     * Converts this JSONMessage object to a String representation of the JSON.
      * This is an alias of {@code toJSON().toString()}.
      */
     @Override
     public String toString() {
         return toJSON().toString();
+    }
+    
+    /**
+     * Converts this JSONMessage object to the legacy formatting system, which uses formatting codes (like &6, &l, &4, etc.)
+     */
+    public String toLegacy() {
+        StringBuilder output = new StringBuilder();
+        for (MessagePart part : parts) {
+            output.append(part.toLegacy());
+        }
+        return output.toString();
     }
 
     /**
@@ -163,6 +185,15 @@ public class JSONMessage {
 
         ReflectionHelper.sendPacket(ReflectionHelper.createSubtitlePacket(toString()), players);
 
+    }
+    
+    /**
+     * Sends an action bar message
+     * 
+     * @param players the players you want to send this to
+     */
+    public void actionbar(Player... players) {
+        actionbar(toLegacy(), players);
     }
 
     /**
@@ -333,7 +364,7 @@ public class JSONMessage {
         private String          text;
 
         public MessagePart(String text) {
-            this.text = text;
+            this.text = text == null ? "null" : text;
         }
 
         public JsonObject toJSON() {
@@ -360,6 +391,20 @@ public class JSONMessage {
 
             return obj;
 
+        }
+
+        /**
+         * @return
+         */
+        public String toLegacy() {
+            StringBuilder output = new StringBuilder();
+            if (color != null) {
+                output.append(color.toString());
+            }
+            for (ChatColor style : styles) {
+                output.append(style.toString());
+            }
+            return output.append(text).toString();
         }
 
         /**
@@ -420,6 +465,9 @@ public class JSONMessage {
          * @param style the style to add
          */
         public void addStyle(ChatColor style) {
+            if (style == null) {
+                throw new IllegalArgumentException("Style cannot be null!");
+            }
             if (!style.isFormat()) {
                 throw new IllegalArgumentException(color.name() + " is not a style!");
             }
@@ -661,6 +709,15 @@ public class JSONMessage {
                 }
             }
 
+        }
+
+        public static Object createActionbarPacket(String message) {
+            if (!SETUP) {
+                throw new IllegalStateException("ReflectionHelper is not set up!");
+            }
+            Object packet = createTextPacket(message);
+            set("b", packet, (byte) 2);
+            return packet;
         }
 
         public static Object createTextPacket(String message) {
