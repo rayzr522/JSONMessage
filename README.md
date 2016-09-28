@@ -51,6 +51,30 @@ To send a JSONMessage, it's quite simple:
                  
 You can pass as many players as you want into `send`, meaning you could send this to huge groups of players.
 
+*Note: If you don't have the following features then please make sure to download the latest version of the class file*
+
+You can now send titles and subtitles too. It's actually very much like send:
+
+    JSONMessage.create("I am a title")
+                 .color(ChatColor.GREEN)
+                 .style(ChatColor.ITALIC)
+               .title(10, 20, 10, player);
+               
+Explanation time. What are those numbers? They are quite simply the `fadeIn`, `stay`, and `fadeOut` variables. These control various aspects of the timing of the title, and they're measured in ticks. So for this example it fades in over 0.5 seconds, stays visible for 1 second, then fades out again over 0.5 seconds.
+
+Adding a subtitle to this is just as easy:
+
+    JSONMessage.create("I am a title")
+                 .color(ChatColor.GREEN)
+                 .style(ChatColor.ITALIC)
+               .title(10, 20, 10, player);
+    
+    JSONMessage.create("A wild subtitle has appeared!")
+                 .color(ChatColor.GOLD)
+               .subtitle(player);
+               
+The only thing to note is that for subtitles you don't pass in times, as that's completely handled by the orginial title.
+
 If you want to see all the available methods, you can find them just below this.
 
 ## Methods overview
@@ -74,6 +98,8 @@ Method | Description
 `toJSON()` | Converts the JSONMessage to a `JsonObject` (Google's Gson library, comes with Bukkit)
 `toString()` | Converts the JSONMessage to a String, useable in things like `/tellraw`. This is an alias of `toJSON().toString()`
 `send(Player...)` | Sends the JSONMessage to one or many players
+`title(int, int, int, Player...)` | Sends the JSONMessage as a title to one or many players. Int parameters are `fadeIn`, `stay`, and `fadeOut`
+`subtitle(Player...)` | Sends the JSONMessage as a subtitle to one or many players
 
 ### Method Notes
 - `color(ChatColor)` and `style(ChatColor)` both use ChatColors but require different types. Attempting to pass the wrong type in (e.g. doing `style(ChatColor.GREEN)`, or doing `color(ChatColor.BOLD)`) will result in an IllegalArgumentException.
