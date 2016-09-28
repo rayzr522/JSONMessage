@@ -5,6 +5,7 @@ package com.perceivedev.jsonmessage;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +78,7 @@ public class JSONMessage {
     public static JSONMessage create(String text) {
         return new JSONMessage(text);
     }
-    
+
     /**
      * Creates a new JSONChat object
      */
@@ -125,9 +126,44 @@ public class JSONMessage {
         return toJSON().toString();
     }
 
+    /**
+     * Sends this JSONMessage to all the players specified
+     * 
+     * @param players the players you want to send this to
+     */
     public void send(Player... players) {
 
         ReflectionHelper.sendPacket(ReflectionHelper.createTextPacket(toString()), players);
+
+    }
+
+    /**
+     * Sends this as a title to all the players specified
+     * 
+     * @param fadeIn how many ticks to fade in
+     * @param stay how many ticks to stay
+     * @param fadeOut how many ticks to fade out
+     * @param players the players to send it to
+     */
+    public void title(int fadeIn, int stay, int fadeOut, Player... players) {
+
+        ReflectionHelper.sendPacket(ReflectionHelper.createTitleTimesPacket(fadeIn, stay, fadeOut), players);
+        ReflectionHelper.sendPacket(ReflectionHelper.createTitlePacket(toString()));
+
+    }
+
+    /**
+     * Sends this as a subtitle to all the players specified
+     * 
+     * @param fadeIn how many ticks to fade in
+     * @param stay how many ticks to stay
+     * @param fadeOut how many ticks to fade out
+     * @param players the players to send it to
+     */
+    public void subtitle(int fadeIn, int stay, int fadeOut, Player... players) {
+
+        ReflectionHelper.sendPacket(ReflectionHelper.createTitleTimesPacket(fadeIn, stay, fadeOut), players);
+        ReflectionHelper.sendPacket(ReflectionHelper.createSubtitlePacket(toString()));
 
     }
 
@@ -271,7 +307,7 @@ public class JSONMessage {
     public JSONMessage bar() {
         return bar(53);
     }
-    
+
     /**
      * Adds a blank line to the message
      * 
@@ -551,11 +587,17 @@ public class JSONMessage {
 
         private static Constructor<?> chatComponentText;
         private static Class<?>       packetPlayOutChat;
+        private static Class<?>       packetPlayOutTitle;
+        private static Class<?>       iChatBaseComponent;
+        private static Class<?>       titleAction;
 
         private static Field          connection;
         private static Method         getHandle;
         private static Method         sendPacket;
         private static Method         stringToChat;
+
+        private static Object         actionTitle;
+        private static Object         actionSubtitle;
 
         private static String         version;
 
@@ -579,6 +621,8 @@ public class JSONMessage {
 
                     chatComponentText = getClass("{nms}.ChatComponentText").getConstructor(String.class);
 
+                    iChatBaseComponent = getClass("{nms}.IChatBaseComponent");
+
                     if (getVersion() > 7) {
                         stringToChat = getClass("{nms}.IChatBaseComponent$ChatSerializer").getMethod("a", String.class);
                     } else {
@@ -586,6 +630,12 @@ public class JSONMessage {
                     }
 
                     packetPlayOutChat = getClass("{nms}.PacketPlayOutChat");
+                    packetPlayOutTitle = getClass("{nms}.PacketPlayOutTitle");
+
+                    titleAction = getClass("{nms}.PacketPlayOutTitle$EnumTitleAction");
+
+                    actionTitle = enumFromName(titleAction, "TITLE");
+                    actionSubtitle = enumFromName(titleAction, "SUBTITLE");
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -631,6 +681,48 @@ public class JSONMessage {
 
         }
 
+        public static Object createTitlePacket(String message) {
+            if (!SETUP) {
+                throw new IllegalStateException("ReflectionHelper is not set up!");
+            }
+            try {
+                Object packet = packetPlayOutTitle.getConstructor(titleAction, iChatBaseComponent).newInstance(actionTitle, fromJson(message));
+                return packet;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+
+        public static Object createSubtitlePacket(String message) {
+            if (!SETUP) {
+                throw new IllegalStateException("ReflectionHelper is not set up!");
+            }
+            try {
+                Object packet = packetPlayOutTitle.getConstructor(titleAction, iChatBaseComponent).newInstance(actionSubtitle, fromJson(message));
+                return packet;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+
+        public static Object createTitleTimesPacket(int fadeIn, int stay, int fadeOut) {
+            if (!SETUP) {
+                throw new IllegalStateException("ReflectionHelper is not set up!");
+            }
+            try {
+                Object packet = packetPlayOutTitle.getConstructor(Integer.class, Integer.class, Integer.class).newInstance(fadeIn, stay, fadeOut);
+                return packet;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+
         public static Object componentText(String msg) {
             if (!SETUP) {
                 throw new IllegalStateException("ReflectionHelper is not set up!");
@@ -641,6 +733,24 @@ public class JSONMessage {
                 e.printStackTrace();
                 return null;
             }
+
+        }
+
+        public static Object enumFromName(Class<?> clazz, String enumName)
+                throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+            Method nameMethod = clazz.getMethod("name");
+            Object value = null;
+            Object[] enums = clazz.getEnumConstants();
+
+            for (Object o : enums) {
+                if (nameMethod.invoke(o).equals("SUBTITLE")) {
+                    value = o;
+                    break;
+                }
+            }
+
+            return value;
 
         }
 
