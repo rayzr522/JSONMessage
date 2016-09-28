@@ -5,7 +5,6 @@ package com.perceivedev.jsonmessage;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,7 +147,7 @@ public class JSONMessage {
     public void title(int fadeIn, int stay, int fadeOut, Player... players) {
 
         ReflectionHelper.sendPacket(ReflectionHelper.createTitleTimesPacket(fadeIn, stay, fadeOut), players);
-        ReflectionHelper.sendPacket(ReflectionHelper.createTitlePacket(toString()));
+        ReflectionHelper.sendPacket(ReflectionHelper.createTitlePacket(toString()), players);
 
     }
 
@@ -160,10 +159,9 @@ public class JSONMessage {
      * @param fadeOut how many ticks to fade out
      * @param players the players to send it to
      */
-    public void subtitle(int fadeIn, int stay, int fadeOut, Player... players) {
+    public void subtitle(Player... players) {
 
-        ReflectionHelper.sendPacket(ReflectionHelper.createTitleTimesPacket(fadeIn, stay, fadeOut), players);
-        ReflectionHelper.sendPacket(ReflectionHelper.createSubtitlePacket(toString()));
+        ReflectionHelper.sendPacket(ReflectionHelper.createSubtitlePacket(toString()), players);
 
     }
 
@@ -634,8 +632,8 @@ public class JSONMessage {
 
                     titleAction = getClass("{nms}.PacketPlayOutTitle$EnumTitleAction");
 
-                    actionTitle = enumFromName(titleAction, "TITLE");
-                    actionSubtitle = enumFromName(titleAction, "SUBTITLE");
+                    actionTitle = titleAction.getField("TITLE").get(null);
+                    actionSubtitle = titleAction.getField("SUBTITLE").get(null);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -714,7 +712,7 @@ public class JSONMessage {
                 throw new IllegalStateException("ReflectionHelper is not set up!");
             }
             try {
-                Object packet = packetPlayOutTitle.getConstructor(Integer.class, Integer.class, Integer.class).newInstance(fadeIn, stay, fadeOut);
+                Object packet = packetPlayOutTitle.getConstructor(int.class, int.class, int.class).newInstance(fadeIn, stay, fadeOut);
                 return packet;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -733,24 +731,6 @@ public class JSONMessage {
                 e.printStackTrace();
                 return null;
             }
-
-        }
-
-        public static Object enumFromName(Class<?> clazz, String enumName)
-                throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-
-            Method nameMethod = clazz.getMethod("name");
-            Object value = null;
-            Object[] enums = clazz.getEnumConstants();
-
-            for (Object o : enums) {
-                if (nameMethod.invoke(o).equals("SUBTITLE")) {
-                    value = o;
-                    break;
-                }
-            }
-
-            return value;
 
         }
 
