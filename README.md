@@ -75,6 +75,27 @@ Adding a subtitle to this is just as easy:
                
 The only thing to note is that for subtitles you don't pass in times, as that's completely handled by the orginial title.
 
+*Note: If you don't have the following features then please make sure to download the latest version of the class file*
+
+Actionbar messages can be sent as well, however there's some oddities with them. They don't use the new JSON format, they actually use the legacy format which uses actual color codes. As such, they don't support click events, hover events, that sort of thing.
+
+There are two ways that JSONMessage allows you to send action bars; a static method:
+
+    JSONMessage.actionbar("Hello", player);
+    
+To add coloring to this you can use `&` color codes:
+
+    JSONMessage.actionbar("&6I got &ccolors!", player);
+   
+The other way to send action bars is by creating a JSONMessage like you normally would and then send it to the player:
+
+    JSONMessage.create("I am a title")
+                 .color(ChatColor.GREEN)
+                 .style(ChatColor.ITALIC)
+               .actionbar(player);
+               
+This will convert the JSON format to the legacy format and then send it to the player.
+
 If you want to see all the available methods, you can find them just below this.
 
 ## Methods overview
@@ -100,6 +121,8 @@ Method | Description
 `send(Player...)` | Sends the JSONMessage to one or many players
 `title(int, int, int, Player...)` | Sends the JSONMessage as a title to one or many players. Int parameters are `fadeIn`, `stay`, and `fadeOut`
 `subtitle(Player...)` | Sends the JSONMessage as a subtitle to one or many players
+`(static) actionbar(String, Player...)` | Sends an action-bar message to one or many players
+`actionbar(Player...)` | Converts the JSONMessage to the legacy format and sends it to one or many players
 
 ### Method Notes
 - `color(ChatColor)` and `style(ChatColor)` both use ChatColors but require different types. Attempting to pass the wrong type in (e.g. doing `style(ChatColor.GREEN)`, or doing `color(ChatColor.BOLD)`) will result in an IllegalArgumentException.
