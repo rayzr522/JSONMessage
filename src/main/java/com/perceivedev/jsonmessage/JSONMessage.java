@@ -138,6 +138,8 @@ public class JSONMessage {
     
     /**
      * Converts this JSONMessage object to the legacy formatting system, which uses formatting codes (like &6, &l, &4, etc.)
+     * 
+     * @return This JSONMessage in legacy format
      */
     public String toLegacy() {
         StringBuilder output = new StringBuilder();
