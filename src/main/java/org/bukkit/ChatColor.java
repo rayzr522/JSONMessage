@@ -57,13 +57,13 @@ public enum ChatColor {
 
     RESET('r', 21);
 
-    public static final char                       COLOR_CHAR = '§';
-    private static final Pattern                   STRIP_COLOR_PATTERN;
-    private final int                              intCode;
-    private final char                             code;
-    private final boolean                          isFormat;
-    private final String                           toString;
-    private static final Map<Integer, ChatColor>   BY_ID;
+    public static final char COLOR_CHAR = '§';
+    private static final Pattern STRIP_COLOR_PATTERN;
+    private final int intCode;
+    private final char code;
+    private final boolean isFormat;
+    private final String toString;
+    private static final Map<Integer, ChatColor> BY_ID;
     private static final Map<Character, ChatColor> BY_CHAR;
 
     static {

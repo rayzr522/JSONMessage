@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.perceivedev.jsonmessage;
+package com.rayzr522.jsonmessage;
 
 import org.bukkit.ChatColor;
 

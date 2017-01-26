@@ -1,8 +1,10 @@
 /**
  * 
  */
-package com.perceivedev.jsonmessage;
+package com.rayzr522.jsonmessage;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -61,25 +63,25 @@ public class JSONMessage {
     private List<MessagePart> parts = new ArrayList<MessagePart>();
 
     /**
-     * Creates a new JSONChat object
+     * Creates a new {@link JSONMessage} object
      * 
-     * @param text the text to start with
+     * @param text The text to start with
      */
     private JSONMessage(String text) {
         parts.add(new MessagePart(text));
     }
 
     /**
-     * Creates a new JSONChat object
+     * Creates a new {@link JSONMessage} object
      * 
-     * @param text the text to start with
+     * @param text The text to start with
      */
     public static JSONMessage create(String text) {
         return new JSONMessage(text);
     }
 
     /**
-     * Creates a new JSONChat object
+     * Creates a new {@link JSONMessage} object
      */
     public static JSONMessage create() {
         return create("");
@@ -88,7 +90,7 @@ public class JSONMessage {
     /**
      * Sends an action bar message
      * 
-     * @param players the players you want to send it to
+     * @param players The players you want to send it to
      */
     public static void actionbar(String message, Player... players) {
 
@@ -108,9 +110,9 @@ public class JSONMessage {
     }
 
     /**
-     * Converts this JSONChat instance to actual JSON
+     * Converts this {@link JSONMessage} instance to actual JSON
      * 
-     * @return The JSON representation of this
+     * @return The JSON representation of this {@link JSONMessage}
      */
     public JsonObject toJSON() {
 
@@ -128,7 +130,7 @@ public class JSONMessage {
     }
 
     /**
-     * Converts this JSONMessage object to a String representation of the JSON.
+     * Converts this {@link JSONMessage} object to a String representation of the JSON.
      * This is an alias of {@code toJSON().toString()}.
      */
     @Override
@@ -137,10 +139,10 @@ public class JSONMessage {
     }
 
     /**
-     * Converts this JSONMessage object to the legacy formatting system, which
+     * Converts this {@link JSONMessage} object to the legacy formatting system, which
      * uses formatting codes (like &6, &l, &4, etc.)
      * 
-     * @return This JSONMessage in legacy format
+     * @return This {@link JSONMessage} instance {@link JSONMessage} in legacy format
      */
     public String toLegacy() {
         StringBuilder output = new StringBuilder();
@@ -151,9 +153,9 @@ public class JSONMessage {
     }
 
     /**
-     * Sends this JSONMessage to all the players specified
+     * Sends this {@link JSONMessage} to all the players specified
      * 
-     * @param players the players you want to send this to
+     * @param players The players you want to send this to
      */
     public void send(Player... players) {
 
@@ -164,36 +166,29 @@ public class JSONMessage {
     /**
      * Sends this as a title to all the players specified
      * 
-     * @param fadeIn how many ticks to fade in
-     * @param stay how many ticks to stay
-     * @param fadeOut how many ticks to fade out
-     * @param players the players to send it to
+     * @param fadeIn How many ticks to fade in
+     * @param stay How many ticks to stay
+     * @param fadeOut How many ticks to fade out
+     * @param players The players to send this to
      */
     public void title(int fadeIn, int stay, int fadeOut, Player... players) {
-
         ReflectionHelper.sendPacket(ReflectionHelper.createTitleTimesPacket(fadeIn, stay, fadeOut), players);
         ReflectionHelper.sendPacket(ReflectionHelper.createTitlePacket(toString()), players);
-
     }
 
     /**
-     * Sends this as a subtitle to all the players specified
+     * Sends this as a subtitle to all the players specified. Must be used after sending a {@link #title(int, int, int, Player...) title}.
      * 
-     * @param fadeIn how many ticks to fade in
-     * @param stay how many ticks to stay
-     * @param fadeOut how many ticks to fade out
-     * @param players the players to send it to
+     * @param players The players to send this to
      */
     public void subtitle(Player... players) {
-
         ReflectionHelper.sendPacket(ReflectionHelper.createSubtitlePacket(toString()), players);
-
     }
 
     /**
      * Sends an action bar message
      * 
-     * @param players the players you want to send this to
+     * @param players The players you want to send this to
      */
     public void actionbar(Player... players) {
         actionbar(toLegacy(), players);
@@ -202,8 +197,8 @@ public class JSONMessage {
     /**
      * Sets the color of the current message part.
      * 
-     * @param color the color to set
-     * @return this
+     * @param color The color to set
+     * @return This {@link JSONMessage} instance
      */
     public JSONMessage color(ChatColor color) {
         last().setColor(color);
@@ -213,8 +208,8 @@ public class JSONMessage {
     /**
      * Adds a style to the current message part.
      * 
-     * @param style the style to add
-     * @return this
+     * @param style The style to add
+     * @return This {@link JSONMessage} instance
      */
     public JSONMessage style(ChatColor style) {
         last().addStyle(style);
@@ -224,30 +219,30 @@ public class JSONMessage {
     /**
      * Makes the text run a command.
      * 
-     * @param cmd the command to run
-     * @return this
+     * @param command The command to run
+     * @return This {@link JSONMessage} instance
      */
-    public JSONMessage runCommand(String cmd) {
-        last().setOnClick(ClickEvent.runCommand(cmd));
+    public JSONMessage runCommand(String command) {
+        last().setOnClick(ClickEvent.runCommand(command));
         return this;
     }
 
     /**
      * Makes the text suggest a command.
      * 
-     * @param cmd the command to suggest
-     * @return this
+     * @param command The command to suggest
+     * @return This {@link JSONMessage} instance
      */
-    public JSONMessage suggestCommand(String cmd) {
-        last().setOnClick(ClickEvent.suggestCommand(cmd));
+    public JSONMessage suggestCommand(String command) {
+        last().setOnClick(ClickEvent.suggestCommand(command));
         return this;
     }
 
     /**
      * Opens a URL.
      * 
-     * @param url the url to open
-     * @return this
+     * @param url The url to open
+     * @return This {@link JSONMessage} instance
      */
     public JSONMessage openURL(String url) {
         last().setOnClick(ClickEvent.openURL(url));
@@ -258,8 +253,8 @@ public class JSONMessage {
      * Changes the page of a book. Using this in a non-book context is useless
      * and will probably error.
      * 
-     * @param page the page to change to
-     * @return this
+     * @param page The page to change to
+     * @return This {@link JSONMessage} instance
      */
     public JSONMessage changePage(int page) {
         last().setOnClick(ClickEvent.changePage(page));
@@ -269,8 +264,8 @@ public class JSONMessage {
     /**
      * Shows text when you hover over it
      * 
-     * @param text the text to show
-     * @return this
+     * @param text The text to show
+     * @return This {@link JSONMessage} instance
      */
     public JSONMessage tooltip(String text) {
         last().setOnHover(HoverEvent.showText(text));
@@ -280,8 +275,8 @@ public class JSONMessage {
     /**
      * Shows text when you hover over it
      * 
-     * @param message the text to show
-     * @return this
+     * @param message The text to show
+     * @return This {@link JSONMessage} instance
      */
     public JSONMessage tooltip(JSONMessage message) {
         last().setOnHover(HoverEvent.showText(message));
@@ -291,7 +286,7 @@ public class JSONMessage {
     /**
      * Shows an achievement when you hover over it
      * 
-     * @param id the id of the achievement
+     * @param id The id of the achievement
      * @return
      */
     public JSONMessage achievement(String id) {
@@ -300,20 +295,20 @@ public class JSONMessage {
     }
 
     /**
-     * Adds another part to this JSONChat
+     * Adds another part to this {@link JSONMessage}
      * 
-     * @param text the text to start with
-     * @return this
+     * @param text The text to start the next {@link MessagePart} with
+     * @return This {@link JSONMessage} instance
      */
     public JSONMessage then(String text) {
         return then(new MessagePart(text));
     }
 
     /**
-     * Adds another part to this JSONChat
+     * Adds another part to this {@link JSONMessage}
      * 
-     * @param text the next part
-     * @return this
+     * @param text The next {@link MessagePart}
+     * @return This {@link JSONMessage} instance
      */
     public JSONMessage then(MessagePart nextPart) {
         parts.add(nextPart);
@@ -323,8 +318,8 @@ public class JSONMessage {
     /**
      * Adds a horizontal bar to the message of the given length
      * 
-     * @param length the length of the horizontal bar
-     * @return this
+     * @param length The length of the horizontal bar
+     * @return This {@link JSONMessage} instance
      */
     public JSONMessage bar(int length) {
         return then(Strings.repeat("-", length)).color(ChatColor.DARK_GRAY).style(ChatColor.STRIKETHROUGH);
@@ -334,7 +329,7 @@ public class JSONMessage {
      * Adds a horizontal bar to the message that's 53 characters long. This is
      * the default width of the player's chat window.
      * 
-     * @return this
+     * @return This {@link JSONMessage} instance
      */
     public JSONMessage bar() {
         return bar(53);
@@ -343,7 +338,7 @@ public class JSONMessage {
     /**
      * Adds a blank line to the message
      * 
-     * @return this
+     * @return This {@link JSONMessage} instance
      */
     public JSONMessage newline() {
         return then("\n");
@@ -353,23 +348,30 @@ public class JSONMessage {
     // BEGIN UTILITY CLASSES //
     ///////////////////////////
     /**
-     * Defines a section of the message.
+     * Defines a section of the message, and represents the format that all JSON messages must follow in Minecraft.
+     * <br>
+     * <br>
+     * <a href="http://minecraft.gamepedia.com/Commands#Raw_JSON_text">Reference</a>
      * 
      * @author Rayzr
-     *
      */
     public class MessagePart {
 
-        private MessageEvent    onClick;
-        private MessageEvent    onHover;
+        private MessageEvent onClick;
+        private MessageEvent onHover;
         private List<ChatColor> styles = new ArrayList<ChatColor>();
-        private ChatColor       color;
-        private String          text;
+        private ChatColor color;
+        private String text;
 
         public MessagePart(String text) {
             this.text = text == null ? "null" : text;
         }
 
+        /**
+         * Converts this {@link MessagePart} into a {@link JsonObject}
+         * 
+         * @return The Minecraft-compatible {@link JsonObject}
+         */
         public JsonObject toJSON() {
             Objects.requireNonNull(text);
 
@@ -397,7 +399,7 @@ public class JSONMessage {
         }
 
         /**
-         * @return
+         * @return This {@link MessagePart} in legacy-style color/formatting codes
          */
         public String toLegacy() {
             StringBuilder output = new StringBuilder();
@@ -411,42 +413,42 @@ public class JSONMessage {
         }
 
         /**
-         * @return the onClick event
+         * @return The click event bound
          */
         public MessageEvent getOnClick() {
             return onClick;
         }
 
         /**
-         * @param onClick the onClick event to set
+         * @param onClick The new click event to bind
          */
         public void setOnClick(MessageEvent onClick) {
             this.onClick = onClick;
         }
 
         /**
-         * @return the onHover event
+         * @return The hover event bound
          */
         public MessageEvent getOnHover() {
             return onHover;
         }
 
         /**
-         * @param onHover the onHover event to set
+         * @param onHover The new hover event to bind
          */
         public void setOnHover(MessageEvent onHover) {
             this.onHover = onHover;
         }
 
         /**
-         * @return the color
+         * @return The color
          */
         public ChatColor getColor() {
             return color;
         }
 
         /**
-         * @param color the color to set
+         * @param color The color to set
          */
         public void setColor(ChatColor color) {
             if (!color.isColor()) {
@@ -456,16 +458,14 @@ public class JSONMessage {
         }
 
         /**
-         * @return the styles
+         * @return The list of styles
          */
         public List<ChatColor> getStyles() {
             return styles;
         }
 
         /**
-         * Adds a style
-         * 
-         * @param style the style to add
+         * @param style The new style to add
          */
         public void addStyle(ChatColor style) {
             if (style == null) {
@@ -478,14 +478,14 @@ public class JSONMessage {
         }
 
         /**
-         * @return the text
+         * @return The raw text
          */
         public String getText() {
             return text;
         }
 
         /**
-         * @param text the text to set
+         * @param text The raw text to set
          */
         public void setText(String text) {
             this.text = text;
@@ -493,6 +493,14 @@ public class JSONMessage {
 
     }
 
+    /**
+     * Represents the JSON format that all click/hover events in JSON messages must follow.
+     * <br>
+     * <br>
+     * <a href="http://minecraft.gamepedia.com/Commands#Raw_JSON_text">Reference</a>
+     * 
+     * @author Rayzr
+     */
     public static class MessageEvent {
 
         private String action;
@@ -506,7 +514,7 @@ public class JSONMessage {
         }
 
         /**
-         * @return
+         * @return A {@link JsonObject} representing the properties of this {@link MessageEvent}
          */
         public JsonObject toJSON() {
             JsonObject obj = new JsonObject();
@@ -520,28 +528,28 @@ public class JSONMessage {
         }
 
         /**
-         * @return the action
+         * @return The action
          */
         public String getAction() {
             return action;
         }
 
         /**
-         * @param action the action to set
+         * @param action The action to set
          */
         public void setAction(String action) {
             this.action = action;
         }
 
         /**
-         * @return the value
+         * @return The value
          */
         public Object getValue() {
             return value;
         }
 
         /**
-         * @param value the value to set
+         * @param value The value to set
          */
         public void setValue(Object value) {
             this.value = value;
@@ -554,28 +562,28 @@ public class JSONMessage {
         /**
          * Runs a command.
          * 
-         * @param cmd the command to run
-         * @return The MessageEvent
+         * @param command The command to run
+         * @return The {@link MessageEvent}
          */
-        public static MessageEvent runCommand(String cmd) {
-            return new MessageEvent("run_command", cmd);
+        public static MessageEvent runCommand(String command) {
+            return new MessageEvent("run_command", command);
         }
 
         /**
          * Suggests a command by putting inserting it in chat.
          * 
-         * @param cmd the command to suggest
-         * @return The MessageEvent
+         * @param command The command to suggest
+         * @return The {@link MessageEvent}
          */
-        public static MessageEvent suggestCommand(String cmd) {
-            return new MessageEvent("suggest_command", cmd);
+        public static MessageEvent suggestCommand(String command) {
+            return new MessageEvent("suggest_command", command);
         }
 
         /**
          * Requires web links to be enabled on the client.
          * 
-         * @param url the url to open
-         * @return The MessageEvent
+         * @param url The url to open
+         * @return The {@link MessageEvent}
          */
         public static MessageEvent openURL(String url) {
             return new MessageEvent("open_url", url);
@@ -584,8 +592,8 @@ public class JSONMessage {
         /**
          * Only used with written books.
          * 
-         * @param page the page to switch to
-         * @return The MessageEvent
+         * @param page The page to switch to
+         * @return The {@link MessageEvent}
          */
         public static MessageEvent changePage(int page) {
             return new MessageEvent("change_page", page);
@@ -598,8 +606,8 @@ public class JSONMessage {
         /**
          * Shows text when you hover over it
          * 
-         * @param text the text to show
-         * @return The MessageEvent
+         * @param text The text to show
+         * @return The {@link MessageEvent}
          */
         public static MessageEvent showText(String text) {
             return new MessageEvent("show_text", text);
@@ -608,8 +616,8 @@ public class JSONMessage {
         /**
          * Shows text when you hover over it
          * 
-         * @param chat the JSON message to show
-         * @return The MessageEvent
+         * @param chat The {@link JSONMessage} to show
+         * @return The {@link MessageEvent}
          */
         public static MessageEvent showText(JSONMessage message) {
             JsonArray arr = new JsonArray();
@@ -621,8 +629,8 @@ public class JSONMessage {
         /**
          * Shows an achievement when you hover over it
          * 
-         * @param id the id over the achievement
-         * @return
+         * @param id The id of the achievement
+         * @return The {@link MessageEvent}
          */
         public static MessageEvent showAchievement(String id) {
             return new MessageEvent("show_achievement", id);
@@ -632,25 +640,25 @@ public class JSONMessage {
 
     private static class ReflectionHelper {
 
-        private static Class<?>       craftPlayer;
+        private static Class<?> craftPlayer;
 
         private static Constructor<?> chatComponentText;
-        private static Class<?>       packetPlayOutChat;
-        private static Class<?>       packetPlayOutTitle;
-        private static Class<?>       iChatBaseComponent;
-        private static Class<?>       titleAction;
+        private static Class<?> packetPlayOutChat;
+        private static Class<?> packetPlayOutTitle;
+        private static Class<?> iChatBaseComponent;
+        private static Class<?> titleAction;
 
-        private static Field          connection;
-        private static Method         getHandle;
-        private static Method         sendPacket;
-        private static Method         stringToChat;
+        private static Field connection;
+        private static MethodHandle GET_HANDLE;
+        private static MethodHandle SEND_PACKET;
+        private static MethodHandle STRING_TO_CHAT;
 
-        private static Object         actionTitle;
-        private static Object         actionSubtitle;
+        private static Object actionTitle;
+        private static Object actionSubtitle;
 
-        private static String         version;
+        private static String version;
 
-        private static boolean        SETUP = false;
+        private static boolean SETUP = false;
 
         static {
 
@@ -664,19 +672,25 @@ public class JSONMessage {
                     SETUP = true;
 
                     craftPlayer = getClass("{obc}.entity.CraftPlayer");
-                    getHandle = craftPlayer.getMethod("getHandle");
+                    Method getHandle = craftPlayer.getMethod("getHandle");
                     connection = getHandle.getReturnType().getField("playerConnection");
-                    sendPacket = connection.getType().getMethod("sendPacket", getClass("{nms}.Packet"));
+                    Method sendPacket = connection.getType().getMethod("sendPacket", getClass("{nms}.Packet"));
 
                     chatComponentText = getClass("{nms}.ChatComponentText").getConstructor(String.class);
 
                     iChatBaseComponent = getClass("{nms}.IChatBaseComponent");
+
+                    Method stringToChat;
 
                     if (getVersion() > 7) {
                         stringToChat = getClass("{nms}.IChatBaseComponent$ChatSerializer").getMethod("a", String.class);
                     } else {
                         stringToChat = getClass("{nms}.ChatSerializer").getMethod("a", String.class);
                     }
+
+                    GET_HANDLE = MethodHandles.lookup().unreflect(getHandle);
+                    SEND_PACKET = MethodHandles.lookup().unreflect(sendPacket);
+                    STRING_TO_CHAT = MethodHandles.lookup().unreflect(stringToChat);
 
                     packetPlayOutChat = getClass("{nms}.PacketPlayOutChat");
                     packetPlayOutTitle = getClass("{nms}.PacketPlayOutTitle");
@@ -705,8 +719,8 @@ public class JSONMessage {
 
             for (Player player : players) {
                 try {
-                    sendPacket.invoke(connection.get(getHandle.invoke(player)), packet);
-                } catch (Exception e) {
+                    SEND_PACKET.bindTo(connection.get(GET_HANDLE.bindTo(player).invoke())).invoke(packet);
+                } catch (Throwable e) {
                     System.err.println("Failed to send packet");
                     e.printStackTrace();
                 }
@@ -803,8 +817,8 @@ public class JSONMessage {
             }
 
             try {
-                return stringToChat.invoke(null, json);
-            } catch (Exception e) {
+                return STRING_TO_CHAT.invoke(json);
+            } catch (Throwable e) {
                 e.printStackTrace();
                 return null;
             }
