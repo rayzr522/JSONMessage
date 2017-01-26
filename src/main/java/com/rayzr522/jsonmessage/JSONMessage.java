@@ -795,12 +795,18 @@ public class JSONMessage {
 
         }
 
-        public static Object componentText(String msg) {
+        /**
+         * Creates a ChatComponentText from plain text
+         * 
+         * @param message The text to convert to a chat component
+         * @return The chat component
+         */
+        public static Object componentText(String message) {
             if (!SETUP) {
                 throw new IllegalStateException("ReflectionHelper is not set up!");
             }
             try {
-                return chatComponentText.newInstance(msg);
+                return chatComponentText.newInstance(message);
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -808,6 +814,12 @@ public class JSONMessage {
 
         }
 
+        /**
+         * Attempts to convert a String representing a JSON message into a usable object
+         * 
+         * @param json The JSON to attempt to parse
+         * @return The object representing the text in JSON form, or <code>null</code> if something went wrong converting the String to JSON data
+         */
         public static Object fromJson(String json) {
             if (!SETUP) {
                 throw new IllegalStateException("ReflectionHelper is not set up!");
@@ -825,6 +837,20 @@ public class JSONMessage {
 
         }
 
+        /**
+         * Returns a class with the given package and name. This method replaces <code>{nms}</code> with <code>net.minecraft.server.[version]</code> and <code>{obc}</code> with <code>org.bukkit.craft.[version]</code>
+         * <br>
+         * <br>
+         * Example:
+         * 
+         * <pre>
+         * Class<?> entityPlayer = ReflectionHelper.getClass("{nms}.EntityPlayer");
+         * </pre>
+         * 
+         * @param path The path to the {@link Class}
+         * @return The class
+         * @throws ClassNotFoundException If the class was not found
+         */
         public static Class<?> getClass(String path) throws ClassNotFoundException {
             if (!SETUP) {
                 throw new IllegalStateException("ReflectionHelper is not set up!");
@@ -832,11 +858,18 @@ public class JSONMessage {
             return Class.forName(path.replace("{nms}", "net.minecraft.server." + version).replace("{obc}", "org.bukkit.craftbukkit." + version));
         }
 
-        public static void set(String field, Object o, Object v) {
+        /**
+         * Sets a field with the given name on an object to the value specified
+         * 
+         * @param field The name of the field to change
+         * @param obj The object to change the field of
+         * @param value The new value to set
+         */
+        public static void set(String field, Object obj, Object value) {
             try {
-                Field f = o.getClass().getDeclaredField(field);
+                Field f = obj.getClass().getDeclaredField(field);
                 f.setAccessible(true);
-                f.set(o, v);
+                f.set(obj, value);
             } catch (Exception e) {
                 e.printStackTrace();
             }
