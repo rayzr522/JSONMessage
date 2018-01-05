@@ -1,4 +1,4 @@
-package com.rayzr522.jsonmessage;
+package me.rayzr522.jsonmessage;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.BiMap;
