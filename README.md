@@ -4,7 +4,7 @@ A modern version of Fanciful
 
 This library aims to completely replace [Fanciful](https://bukkit.org/threads/lib-fanciful-pleasant-chat-message-formatting.195148/), which sadly has stopped being updated. I figured I'd take a stab at re-creating it, and even making it better.
 
-The best thing about this library? It's only a [single class file](https://github.com/Rayzr522/JSONMessage/blob/master/src/main/java/com/rayzr522/jsonmessage/JSONMessage.java), so you can just drag and drop it into your project!
+The best thing about this library? It's only a [single class file](https://github.com/Rayzr522/JSONMessage/blob/master/src/main/java/me/rayzr522/jsonmessage/JSONMessage.java), so you can just drag and drop it into your project!
 
 ## Usage
 
@@ -91,7 +91,7 @@ JSONMessage.create("A wild subtitle has appeared!")
             .subtitle(player);
 ```
 
-The only thing to note is that for subtitles you don't pass in times, as that's completely handled by the orginial title.
+The only thing to note is that for subtitles you don't pass in times, as that's completely handled by the original title.
 
 > Note: If you don't have the following features then please make sure to download the latest version of the class file
 
@@ -141,7 +141,7 @@ Method | Description
 `bar()` | Creates a horizontal divider bar 53 characters long. This is perfect for the default chat window width
 `newline()` | Inserts a newline. It really isn't necessary, you can just use `\n` if you want
 `toJSON()` | Converts the JSONMessage to a `JsonObject` (Google's Gson library, comes with Bukkit)
-`toString()` | Converts the JSONMessage to a String, useable in things like `/tellraw`. This is an alias of `toJSON().toString()`
+`toString()` | Converts the JSONMessage to a String, usable in things like `/tellraw`. This is an alias of `toJSON().toString()`
 `send(Player...)` | Sends the JSONMessage to one or many players
 `title(int, int, int, Player...)` | Sends the JSONMessage as a title to one or many players. Int parameters are `fadeIn`, `stay`, and `fadeOut`
 `subtitle(Player...)` | Sends the JSONMessage as a subtitle to one or many players
