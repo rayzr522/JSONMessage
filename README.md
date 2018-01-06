@@ -4,7 +4,27 @@ A modern version of Fanciful
 
 This library aims to completely replace [Fanciful](https://bukkit.org/threads/lib-fanciful-pleasant-chat-message-formatting.195148/), which sadly has stopped being updated. I figured I'd take a stab at re-creating it, and even making it better.
 
-The best thing about this library? It's only a [single class file](https://github.com/Rayzr522/JSONMessage/blob/master/src/main/java/me/rayzr522/jsonmessage/JSONMessage.java), so you can just drag and drop it into your project!
+## Installation
+
+For those of you using Maven, just add the following to your `pom.xml` file:
+
+```xml
+<repository>
+    <id>rayzr-repo</id>
+    <url>https://cdn.rawgit.com/Rayzr522/maven-repo/master/</url>
+</repository>
+```
+
+```xml
+<dependency>
+    <groupId>me.rayzr522</groupId>
+    <artifactId>jsonmessage</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+Otherwise, just drag n' drop the [single class file](https://github.com/Rayzr522/JSONMessage/blob/master/src/main/java/me/rayzr522/jsonmessage/JSONMessage.java) into your project.
+> If you are not yet using Maven, you should be. Really, you should. It's amazing.
 
 ## Usage
 
