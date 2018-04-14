@@ -118,9 +118,11 @@ public class JSONMessage {
         obj.addProperty("text", "");
 
         JsonArray array = new JsonArray();
-        for (MessagePart part : parts) {
-            array.add(part.toJSON());
-        }
+
+        parts.stream()
+                .map(MessagePart::toJSON)
+                .forEach(array::add);
+
         obj.add("extra", array);
 
         return obj;
@@ -143,9 +145,11 @@ public class JSONMessage {
      */
     public String toLegacy() {
         StringBuilder output = new StringBuilder();
-        for (MessagePart part : parts) {
-            output.append(part.toLegacy());
-        }
+
+        parts.stream()
+                .map(MessagePart::toLegacy)
+                .forEach(output::append);
+
         return output.toString();
     }
 
@@ -578,19 +582,20 @@ public class JSONMessage {
         }
 
         private static void setType(Object object, byte type) {
-            if (MAJOR_VER >= 12) {
-                switch (type) {
-                    case 1:
-                        set("b", object, enumChatMessage);
-                        break;
-                    case 2:
-                        set("b", object, enumActionbarMessage);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("type must be 1 or 2");
-                }
-            } else {
+            if (MAJOR_VER < 12) {
                 set("b", object, type);
+                return;
+            }
+
+            switch (type) {
+                case 1:
+                    set("b", object, enumChatMessage);
+                    break;
+                case 2:
+                    set("b", object, enumActionbarMessage);
+                    break;
+                default:
+                    throw new IllegalArgumentException("type must be 1 or 2");
             }
         }
 
@@ -705,7 +710,7 @@ public class JSONMessage {
          * <br>
          * <br>
          * Example:
-         * <p>
+         *
          * <pre>
          * Class<?> entityPlayer = ReflectionHelper.getClass("{nms}.EntityPlayer");
          * </pre>
@@ -812,9 +817,10 @@ public class JSONMessage {
             if (color != null) {
                 output.append(color.toString());
             }
-            for (ChatColor style : styles) {
-                output.append(style.toString());
-            }
+            styles.stream()
+                    .map(ChatColor::toString)
+                    .forEach(output::append);
+
             return output.append(text).toString();
         }
 
