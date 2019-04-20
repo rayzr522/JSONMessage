@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Vector;
 
 /**
  * This is a complete JSON message builder class. To create a new JSONMessage do
@@ -28,7 +29,6 @@ import java.util.Objects;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class JSONMessage {
-
     private static final BiMap<ChatColor, String> stylesToNames;
 
     static {
@@ -56,7 +56,9 @@ public class JSONMessage {
         stylesToNames = builder.build();
     }
 
+
     private final List<MessagePart> parts = new ArrayList<>();
+    private int centeringStartIndex = -1;
 
     /**
      * Creates a new {@link JSONMessage} object
@@ -341,6 +343,54 @@ public class JSONMessage {
      */
     public JSONMessage newline() {
         return then("\n");
+    }
+
+    /**
+     * Sets the starting point to begin centering JSONMessages.
+     *
+     * @return This {@link JSONMessage} instance
+     */
+    public JSONMessage beginCenter() {
+        // Start with the NEXT message part.
+        centeringStartIndex = parts.size();
+        return this;
+    }
+
+    /**
+     * Ends the centering of the JSONMessage text.
+     *
+     * @return This {@link JSONMessage} instance
+     */
+    public JSONMessage endCenter() {
+        int current = centeringStartIndex;
+
+        while (current < parts.size()) {
+            Vector<MessagePart> currentLine = new Vector<>();
+            int totalLineLength = 0;
+
+            for (; ; current++) {
+                MessagePart part = current < parts.size() ? parts.get(current) : null;
+                String raw = part == null ? null : ChatColor.stripColor(part.toLegacy());
+
+                if (current >= parts.size() || totalLineLength + raw.length() >= 53) {
+                    int padding = Math.max(0, (53 - totalLineLength) / 2);
+                    currentLine.firstElement().setText(Strings.repeat(" ", padding) + currentLine.firstElement().getText());
+                    currentLine.lastElement().setText(currentLine.lastElement().getText() + "\n");
+                    currentLine.clear();
+                    break;
+                }
+
+                totalLineLength += raw.length();
+                currentLine.add(part);
+            }
+        }
+
+        MessagePart last = parts.get(parts.size() - 1);
+        last.setText(last.getText().substring(0, last.getText().length() - 1));
+
+        centeringStartIndex = -1;
+
+        return this;
     }
 
     ///////////////////////////
