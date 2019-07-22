@@ -11,7 +11,7 @@ For those of you using Maven, just add the following to your `pom.xml` file:
 ```xml
 <repository>
     <id>rayzr-repo</id>
-    <url>https://cdn.rawgit.com/Rayzr522/maven-repo/master/</url>
+    <url>https://rayzr.dev/repo/</url>
 </repository>
 ```
 
@@ -19,7 +19,7 @@ For those of you using Maven, just add the following to your `pom.xml` file:
 <dependency>
     <groupId>me.rayzr522</groupId>
     <artifactId>jsonmessage</artifactId>
-    <version>1.0.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
