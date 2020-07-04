@@ -212,6 +212,10 @@ public class JSONMessage{
      * @return This {@link JSONMessage} instance
      */
     public JSONMessage color(String color) {
+        if(color.startsWith("#") && ReflectionHelper.MAJOR_VER < 16) {
+            throw new IllegalArgumentException("Hex colors are only supported on 1.16+!");
+        }
+        
         last().setColor(color);
         return this;
     }
