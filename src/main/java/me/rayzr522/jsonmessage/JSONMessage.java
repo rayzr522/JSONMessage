@@ -15,20 +15,12 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Vector;
+import java.util.*;
 
-/**
- * This is a complete JSON message builder class. To create a new JSONMessage do
- * {@link #create(String)}
- *
- * @author Rayzr
- */
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class JSONMessage {
+public class JSONMessage{
     private static final BiMap<ChatColor, String> stylesToNames;
     
     static {
@@ -212,6 +204,24 @@ public class JSONMessage {
     }
     
     /**
+     * Sets the color of the current message part.
+     * <br>This method allows you to provide a hex color, which can be used in 1.16 to color the message in any Hex color
+     * imaginable.
+     * 
+     * @param color The color to set
+     * @return This {@link JSONMessage} instance
+     */
+    public JSONMessage color(String color) {
+        last().setColor(color);
+        return this;
+    }
+    
+    public JSONMessage font(String font) {
+        last().setFont(font);
+        return this;
+    }
+    
+    /**
      * Adds a style to the current message part.
      *
      * @param style The style to add
@@ -258,7 +268,7 @@ public class JSONMessage {
     /**
      * Copies the provided text to the Clipboard of the player.
      * <br>This can only be used in 1.15 or newer and defaults to {@link ClickEvent#suggestCommand(String) Suggesting the text}.
-     * 
+     *
      * @param text The text to copy
      * @return This {@link JSONMessage} instance
      */
@@ -523,11 +533,11 @@ public class JSONMessage {
         public static MessageEvent changePage(int page) {
             return new MessageEvent("change_page", page);
         }
-    
+        
         /**
          * Only usable in versions 1.15 and newer.
          * <br>Will default to putting the command in the chat bar using {@link #suggestCommand(String)} suggestCommand(String)}
-         * 
+         *
          * @param text The text to copy.
          * @return The {@link MessageEvent}
          */
@@ -878,7 +888,8 @@ public class JSONMessage {
         private final List<ChatColor> styles = new ArrayList<>();
         private MessageEvent onClick;
         private MessageEvent onHover;
-        private ChatColor color;
+        private String color;
+        private String font;
         private String text;
         
         public MessagePart(String text) {
@@ -896,8 +907,8 @@ public class JSONMessage {
             JsonObject obj = new JsonObject();
             obj.addProperty("text", text);
             
-            if (color != null) {
-                obj.addProperty("color", color.name().toLowerCase());
+            if (color != null && !color.isEmpty()) {
+                obj.addProperty("color", color.toLowerCase());
             }
             
             for (ChatColor style : styles) {
@@ -912,6 +923,10 @@ public class JSONMessage {
                 obj.add("hoverEvent", onHover.toJSON());
             }
             
+            if (font != null) {
+                obj.addProperty("font", font);
+            }
+            
             return obj;
             
         }
@@ -922,7 +937,7 @@ public class JSONMessage {
         public String toLegacy() {
             StringBuilder output = new StringBuilder();
             if (color != null) {
-                output.append(color.toString());
+                output.append(color);
             }
             styles.stream()
                     .map(ChatColor::toString)
@@ -962,7 +977,7 @@ public class JSONMessage {
         /**
          * @return The color
          */
-        public ChatColor getColor() {
+        public String getColor() {
             return color;
         }
         
@@ -972,6 +987,13 @@ public class JSONMessage {
         public void setColor(ChatColor color) {
             if (!color.isColor()) {
                 throw new IllegalArgumentException(color.name() + " is not a color!");
+            }
+            setColor(color.name().toLowerCase());
+        }
+        
+        public void setColor(String color) {
+            if(color == null || color.isEmpty()){
+                throw new IllegalArgumentException("Color cannot be null!");
             }
             this.color = color;
         }
@@ -991,9 +1013,23 @@ public class JSONMessage {
                 throw new IllegalArgumentException("Style cannot be null!");
             }
             if (!style.isFormat()) {
-                throw new IllegalArgumentException(color.name() + " is not a style!");
+                throw new IllegalArgumentException(style.name() + " is not a style!");
             }
             styles.add(style);
+        }
+    
+        /**
+         * @return The font used
+         */
+        public String getFont() {
+            return font;
+        }
+    
+        /**
+         * @param font The font to use
+         */
+        public void setFont(String font) {
+            this.font = font;
         }
         
         /**
@@ -1011,4 +1047,3 @@ public class JSONMessage {
         }
         
     }
-}
