@@ -20,10 +20,10 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- *  This is a complete JSON message builder class. To create a new JSONMessage do
- *  {@link #create(String)}
- *  
- *  @author Rayzr
+ * This is a complete JSON message builder class. To create a new JSONMessage do
+ * {@link #create(String)}
+ * 
+ * @author Rayzr
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class JSONMessage {
