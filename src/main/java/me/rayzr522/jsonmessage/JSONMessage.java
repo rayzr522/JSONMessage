@@ -19,17 +19,23 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+/**
+ *  This is a complete JSON message builder class. To create a new JSONMessage do
+ *  {@link #create(String)}
+ *  
+ *  @author Rayzr
+ */
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class JSONMessage{
+public class JSONMessage {
     private static final BiMap<ChatColor, String> stylesToNames;
-    
+
     static {
         ImmutableBiMap.Builder<ChatColor, String> builder = ImmutableBiMap.builder();
         for (final ChatColor style : ChatColor.values()) {
             if (!style.isFormat()) {
                 continue;
             }
-            
+
             String styleName;
             switch (style) {
                 case MAGIC:
@@ -42,16 +48,16 @@ public class JSONMessage{
                     styleName = style.name().toLowerCase();
                     break;
             }
-            
+
             builder.put(style, styleName);
         }
         stylesToNames = builder.build();
     }
-    
-    
+
+
     private final List<MessagePart> parts = new ArrayList<>();
     private int centeringStartIndex = -1;
-    
+
     /**
      * Creates a new {@link JSONMessage} object
      *
@@ -60,7 +66,7 @@ public class JSONMessage{
     private JSONMessage(String text) {
         parts.add(new MessagePart(text));
     }
-    
+
     /**
      * Creates a new {@link JSONMessage} object
      *
@@ -70,7 +76,7 @@ public class JSONMessage{
     public static JSONMessage create(String text) {
         return new JSONMessage(text);
     }
-    
+
     /**
      * Creates a new {@link JSONMessage} object
      *
@@ -79,7 +85,7 @@ public class JSONMessage{
     public static JSONMessage create() {
         return create("");
     }
-    
+
     /**
      * Sends an action bar message
      *
@@ -89,7 +95,7 @@ public class JSONMessage{
     public static void actionbar(String message, Player... players) {
         ReflectionHelper.sendPacket(ReflectionHelper.createActionbarPacket(ChatColor.translateAlternateColorCodes('&', message)), players);
     }
-    
+
     /**
      * @return The latest {@link MessagePart}
      * @throws ArrayIndexOutOfBoundsException If {@code parts.size() <= 0}.
@@ -100,7 +106,7 @@ public class JSONMessage{
         }
         return parts.get(parts.size() - 1);
     }
-    
+
     /**
      * Converts this {@link JSONMessage} instance to actual JSON
      *
@@ -108,20 +114,20 @@ public class JSONMessage{
      */
     public JsonObject toJSON() {
         JsonObject obj = new JsonObject();
-        
+
         obj.addProperty("text", "");
-        
+
         JsonArray array = new JsonArray();
-        
+
         parts.stream()
                 .map(MessagePart::toJSON)
                 .forEach(array::add);
-        
+
         obj.add("extra", array);
-        
+
         return obj;
     }
-    
+
     /**
      * Converts this {@link JSONMessage} object to a String representation of the JSON.
      * This is an alias of {@code toJSON().toString()}.
@@ -130,7 +136,7 @@ public class JSONMessage{
     public String toString() {
         return toJSON().toString();
     }
-    
+
     /**
      * Converts this {@link JSONMessage} object to the legacy formatting system, which
      * uses formatting codes (like &amp;6, &amp;l, &amp;4, etc.)
@@ -139,14 +145,14 @@ public class JSONMessage{
      */
     public String toLegacy() {
         StringBuilder output = new StringBuilder();
-        
+
         parts.stream()
                 .map(MessagePart::toLegacy)
                 .forEach(output::append);
-        
+
         return output.toString();
     }
-    
+
     /**
      * Sends this {@link JSONMessage} to all the players specified
      *
@@ -157,10 +163,10 @@ public class JSONMessage{
             ReflectionHelper.sendTextPacket(toString(), players);
             return;
         }
-        
+
         ReflectionHelper.sendPacket(ReflectionHelper.createTextPacket(toString()), players);
     }
-    
+
     /**
      * Sends this as a title to all the players specified
      *
@@ -173,7 +179,7 @@ public class JSONMessage{
         ReflectionHelper.sendPacket(ReflectionHelper.createTitleTimesPacket(fadeIn, stay, fadeOut), players);
         ReflectionHelper.sendPacket(ReflectionHelper.createTitlePacket(toString()), players);
     }
-    
+
     /**
      * Sends this as a subtitle to all the players specified. Must be used after sending a {@link #title(int, int, int, Player...) title}.
      *
@@ -182,7 +188,7 @@ public class JSONMessage{
     public void subtitle(Player... players) {
         ReflectionHelper.sendPacket(ReflectionHelper.createSubtitlePacket(toString()), players);
     }
-    
+
     /**
      * Sends an action bar message
      *
@@ -191,7 +197,7 @@ public class JSONMessage{
     public void actionbar(Player... players) {
         actionbar(toLegacy(), players);
     }
-    
+
     /**
      * Sets the color of the current message part.
      *
@@ -199,32 +205,56 @@ public class JSONMessage{
      * @return This {@link JSONMessage} instance
      */
     public JSONMessage color(ChatColor color) {
-        last().setColor(color);
+        if (!color.isColor())
+            throw new IllegalArgumentException(color.name() + " is not a color.");
+        last().setColor(color.name().toLowerCase());
         return this;
     }
-    
+
     /**
      * Sets the color of the current message part.
-     * <br>This method allows you to provide a hex color, which can be used in 1.16 to color the message in any Hex color
-     * imaginable.
-     * 
+     * <br>If the provided color is a hex color ({@code #rrggbb}) but the major version of MC is older than 1.16 will this
+     * default to the color WHITE.
+     *
      * @param color The color to set
      * @return This {@link JSONMessage} instance
      */
     public JSONMessage color(String color) {
-        if(color.startsWith("#") && ReflectionHelper.MAJOR_VER < 16) {
-            throw new IllegalArgumentException("Hex colors are only supported on 1.16+!");
-        }
-        
+        return color(color, ChatColor.WHITE);
+    }
+
+    /**
+     * Sets the color of the current message part.
+     * <br>If the provided color is a hex color ({@code #rrggbb}) but the major version of MC is older than 1.16 will the provided
+     * default ChatColor be used instead.
+     * 
+     * @param color The color to set
+     * @param def The default ChatColor to use, when MC version is older than 1.16
+     * @return This {@link JSONMessage} instance
+     */
+    public JSONMessage color(String color, ChatColor def) {
+        if (color.startsWith("#") && ReflectionHelper.MAJOR_VER < 16)
+            return color(def);
+
         last().setColor(color);
         return this;
     }
-    
+
+    /**
+     * Sets the font of the current message part.
+     * <br>When this is used on versions older than 1.16 will this do nothing.
+     * 
+     * @param font The font to set
+     * @return This {@link JSONMessage} instance
+     */
     public JSONMessage font(String font) {
+        if (ReflectionHelper.MAJOR_VER < 16)
+            return this;
+        
         last().setFont(font);
         return this;
     }
-    
+
     /**
      * Adds a style to the current message part.
      *
@@ -235,7 +265,7 @@ public class JSONMessage{
         last().addStyle(style);
         return this;
     }
-    
+
     /**
      * Makes the text run a command.
      *
@@ -246,7 +276,7 @@ public class JSONMessage{
         last().setOnClick(ClickEvent.runCommand(command));
         return this;
     }
-    
+
     /**
      * Makes the text suggest a command.
      *
@@ -257,7 +287,7 @@ public class JSONMessage{
         last().setOnClick(ClickEvent.suggestCommand(command));
         return this;
     }
-    
+
     /**
      * Opens a URL.
      *
@@ -268,10 +298,10 @@ public class JSONMessage{
         last().setOnClick(ClickEvent.openURL(url));
         return this;
     }
-    
+
     /**
      * Copies the provided text to the Clipboard of the player.
-     * <br>This can only be used in 1.15 or newer and defaults to {@link ClickEvent#suggestCommand(String) Suggesting the text}.
+     * <br>When this is used on versions older than 1.15 will this default to {@link #suggestCommand(String) suggestCommand(String)}.
      *
      * @param text The text to copy
      * @return This {@link JSONMessage} instance
@@ -280,7 +310,7 @@ public class JSONMessage{
         last().setOnClick(ClickEvent.copyText(text));
         return this;
     }
-    
+
     /**
      * Changes the page of a book. Using this in a non-book context is useless
      * and will probably error.
@@ -292,7 +322,7 @@ public class JSONMessage{
         last().setOnClick(ClickEvent.changePage(page));
         return this;
     }
-    
+
     /**
      * Shows text when you hover over it
      *
@@ -303,7 +333,7 @@ public class JSONMessage{
         last().setOnHover(HoverEvent.showText(text));
         return this;
     }
-    
+
     /**
      * Shows text when you hover over it
      *
@@ -314,7 +344,7 @@ public class JSONMessage{
         last().setOnHover(HoverEvent.showText(message));
         return this;
     }
-    
+
     /**
      * Shows an achievement when you hover over it
      *
@@ -325,7 +355,7 @@ public class JSONMessage{
         last().setOnHover(HoverEvent.showAchievement(id));
         return this;
     }
-    
+
     /**
      * Adds another part to this {@link JSONMessage}
      *
@@ -335,7 +365,7 @@ public class JSONMessage{
     public JSONMessage then(String text) {
         return then(new MessagePart(text));
     }
-    
+
     /**
      * Adds another part to this {@link JSONMessage}
      *
@@ -346,7 +376,7 @@ public class JSONMessage{
         parts.add(nextPart);
         return this;
     }
-    
+
     /**
      * Adds a horizontal bar to the message of the given length
      *
@@ -356,7 +386,7 @@ public class JSONMessage{
     public JSONMessage bar(int length) {
         return then(Strings.repeat("-", length)).color(ChatColor.DARK_GRAY).style(ChatColor.STRIKETHROUGH);
     }
-    
+
     /**
      * Adds a horizontal bar to the message that's 53 characters long. This is
      * the default width of the player's chat window.
@@ -366,7 +396,7 @@ public class JSONMessage{
     public JSONMessage bar() {
         return bar(53);
     }
-    
+
     /**
      * Adds a blank line to the message
      *
@@ -375,7 +405,7 @@ public class JSONMessage{
     public JSONMessage newline() {
         return then("\n");
     }
-    
+
     /**
      * Sets the starting point to begin centering JSONMessages.
      *
@@ -386,7 +416,7 @@ public class JSONMessage{
         centeringStartIndex = parts.size();
         return this;
     }
-    
+
     /**
      * Ends the centering of the JSONMessage text.
      *
@@ -394,15 +424,15 @@ public class JSONMessage{
      */
     public JSONMessage endCenter() {
         int current = centeringStartIndex;
-        
+
         while (current < parts.size()) {
             Vector<MessagePart> currentLine = new Vector<>();
             int totalLineLength = 0;
-            
+
             for (; ; current++) {
                 MessagePart part = current < parts.size() ? parts.get(current) : null;
                 String raw = part == null ? null : ChatColor.stripColor(part.toLegacy());
-                
+
                 if (current >= parts.size() || totalLineLength + raw.length() >= 53) {
                     int padding = Math.max(0, (53 - totalLineLength) / 2);
                     currentLine.firstElement().setText(Strings.repeat(" ", padding) + currentLine.firstElement().getText());
@@ -410,24 +440,24 @@ public class JSONMessage{
                     currentLine.clear();
                     break;
                 }
-                
+
                 totalLineLength += raw.length();
                 currentLine.add(part);
             }
         }
-        
+
         MessagePart last = parts.get(parts.size() - 1);
         last.setText(last.getText().substring(0, last.getText().length() - 1));
-        
+
         centeringStartIndex = -1;
-        
+
         return this;
     }
-    
+
     ///////////////////////////
     // BEGIN UTILITY CLASSES //
     ///////////////////////////
-    
+
     /**
      * Represents the JSON format that all click/hover events in JSON messages must follow.
      * <br>
@@ -437,15 +467,15 @@ public class JSONMessage{
      * @author Rayzr
      */
     public static class MessageEvent {
-        
+
         private String action;
         private Object value;
-        
+
         public MessageEvent(String action, Object value) {
             this.action = action;
             this.value = value;
         }
-        
+
         /**
          * @return A {@link JsonObject} representing the properties of this {@link MessageEvent}
          */
@@ -457,7 +487,7 @@ public class JSONMessage{
              * Since this lib only has tooltip and achievement can we simply check if action starts with "show_"
              */
             String valueType = (ReflectionHelper.MAJOR_VER >= 16 && action.startsWith("show_")) ? "contents" : "value";
-            
+
             if (value instanceof JsonElement) {
                 obj.add(valueType, (JsonElement) value);
             } else {
@@ -465,39 +495,39 @@ public class JSONMessage{
             }
             return obj;
         }
-        
+
         /**
          * @return The action
          */
         public String getAction() {
             return action;
         }
-        
+
         /**
          * @param action The action to set
          */
         public void setAction(String action) {
             this.action = action;
         }
-        
+
         /**
          * @return The value
          */
         public Object getValue() {
             return value;
         }
-        
+
         /**
          * @param value The value to set
          */
         public void setValue(Object value) {
             this.value = value;
         }
-        
+
     }
-    
+
     public static class ClickEvent {
-        
+
         /**
          * Runs a command.
          *
@@ -507,7 +537,7 @@ public class JSONMessage{
         public static MessageEvent runCommand(String command) {
             return new MessageEvent("run_command", command);
         }
-        
+
         /**
          * Suggests a command by inserting it in chat.
          *
@@ -517,7 +547,7 @@ public class JSONMessage{
         public static MessageEvent suggestCommand(String command) {
             return new MessageEvent("suggest_command", command);
         }
-        
+
         /**
          * Requires web links to be enabled on the client.
          *
@@ -527,7 +557,7 @@ public class JSONMessage{
         public static MessageEvent openURL(String url) {
             return new MessageEvent("open_url", url);
         }
-        
+
         /**
          * Only used with written books.
          *
@@ -537,25 +567,25 @@ public class JSONMessage{
         public static MessageEvent changePage(int page) {
             return new MessageEvent("change_page", page);
         }
-        
+
         /**
-         * Only usable in versions 1.15 and newer.
-         * <br>Will default to putting the command in the chat bar using {@link #suggestCommand(String)} suggestCommand(String)}
+         * Copies the provided text to the clipboard of the player.
+         * <br>When used on versions older than 1.15 will this {@link #suggestCommand(String) suggest the text} instead.
          *
          * @param text The text to copy.
          * @return The {@link MessageEvent}
          */
         public static MessageEvent copyText(String text) {
-            if(ReflectionHelper.MAJOR_VER < 15)
+            if (ReflectionHelper.MAJOR_VER < 15)
                 return suggestCommand(text);
-            
+
             return new MessageEvent("copy_to_clipboard", text);
         }
-        
+
     }
-    
+
     public static class HoverEvent {
-        
+
         /**
          * Shows text when you hover over it
          *
@@ -565,7 +595,7 @@ public class JSONMessage{
         public static MessageEvent showText(String text) {
             return new MessageEvent("show_text", text);
         }
-        
+
         /**
          * Shows text when you hover over it
          *
@@ -578,7 +608,7 @@ public class JSONMessage{
             arr.add(message.toJSON());
             return new MessageEvent("show_text", arr);
         }
-        
+
         /**
          * Shows an achievement when you hover over it
          *
@@ -588,11 +618,11 @@ public class JSONMessage{
         public static MessageEvent showAchievement(String id) {
             return new MessageEvent("show_achievement", id);
         }
-        
+
     }
-    
+
     private static class ReflectionHelper {
-        
+
         private static final String version;
         private static Class<?> craftPlayer;
         private static Constructor<?> chatComponentText;
@@ -610,59 +640,59 @@ public class JSONMessage{
         private static Object enumActionbarMessage;
         private static boolean SETUP;
         private static int MAJOR_VER = -1;
-        
+
         static {
             String[] split = Bukkit.getServer().getClass().getPackage().getName().split("\\.");
             version = split[split.length - 1];
-            
+
             try {
                 SETUP = true;
-                
+
                 MAJOR_VER = getVersion();
-                
+
                 craftPlayer = getClass("{obc}.entity.CraftPlayer");
                 Method getHandle = craftPlayer.getMethod("getHandle");
                 connection = getHandle.getReturnType().getField("playerConnection");
                 Method sendPacket = connection.getType().getMethod("sendPacket", getClass("{nms}.Packet"));
-                
+
                 chatComponentText = getClass("{nms}.ChatComponentText").getConstructor(String.class);
-                
+
                 iChatBaseComponent = getClass("{nms}.IChatBaseComponent");
-                
+
                 Method stringToChat;
-                
+
                 if (MAJOR_VER < 8) {
                     stringToChat = getClass("{nms}.ChatSerializer").getMethod("a", String.class);
                 } else {
                     stringToChat = getClass("{nms}.IChatBaseComponent$ChatSerializer").getMethod("a", String.class);
                 }
-                
+
                 GET_HANDLE = MethodHandles.lookup().unreflect(getHandle);
                 SEND_PACKET = MethodHandles.lookup().unreflect(sendPacket);
                 STRING_TO_CHAT = MethodHandles.lookup().unreflect(stringToChat);
-                
+
                 packetPlayOutChat = getClass("{nms}.PacketPlayOutChat");
                 packetPlayOutTitle = getClass("{nms}.PacketPlayOutTitle");
-                
+
                 titleAction = getClass("{nms}.PacketPlayOutTitle$EnumTitleAction");
-                
+
                 enumActionTitle = titleAction.getField("TITLE").get(null);
                 enumActionSubtitle = titleAction.getField("SUBTITLE").get(null);
-                
+
                 if (MAJOR_VER >= 12) {
                     Method getChatMessageType = getClass("{nms}.ChatMessageType").getMethod("a", byte.class);
-                    
+
                     enumChatMessage = getChatMessageType.invoke(null, (byte) 1);
                     enumActionbarMessage = getChatMessageType.invoke(null, (byte) 2);
                 }
-                
+
             } catch (Exception e) {
                 e.printStackTrace();
                 SETUP = false;
             }
-            
+
         }
-        
+
         static void sendPacket(Object packet, Player... players) {
             if (!SETUP) {
                 throw new IllegalStateException("ReflectionHelper is not set up!");
@@ -670,7 +700,7 @@ public class JSONMessage{
             if (packet == null) {
                 return;
             }
-            
+
             for (Player player : players) {
                 try {
                     SEND_PACKET.bindTo(connection.get(GET_HANDLE.bindTo(player).invoke())).invoke(packet);
@@ -679,15 +709,15 @@ public class JSONMessage{
                     e.printStackTrace();
                 }
             }
-            
+
         }
-        
+
         private static void setType(Object object, byte type) {
             if (MAJOR_VER < 12) {
                 set("b", object, type);
                 return;
             }
-            
+
             switch (type) {
                 case 1:
                     set("b", object, enumChatMessage);
@@ -699,7 +729,7 @@ public class JSONMessage{
                     throw new IllegalArgumentException("type must be 1 or 2");
             }
         }
-        
+
         static Object createActionbarPacket(String message) {
             if (!SETUP) {
                 throw new IllegalStateException("ReflectionHelper is not set up!");
@@ -708,7 +738,7 @@ public class JSONMessage{
             setType(packet, (byte) 2);
             return packet;
         }
-        
+
         static Object createTextPacket(String message) {
             if (!SETUP) {
                 throw new IllegalStateException("ReflectionHelper is not set up!");
@@ -722,16 +752,16 @@ public class JSONMessage{
                 e.printStackTrace();
                 return null;
             }
-            
+
         }
-        
+
         static void sendTextPacket(String message, Player... players) {
             try {
                 for (Player player : players) {
                     Class chatTypeClass = getClass("{nms}.ChatMessageType");
                     Constructor<?> constructor = packetPlayOutChat.getConstructor(getClass("{nms}.IChatBaseComponent"), chatTypeClass, UUID.class);
                     Object packet = constructor.newInstance(fromJson(message), Enum.valueOf(chatTypeClass, "CHAT"), player.getUniqueId());
-                    
+
                     Object handler = player.getClass().getMethod("getHandle").invoke(player);
                     Object playerConnection = handler.getClass().getField("playerConnection").get(handler);
                     playerConnection.getClass().getMethod("sendPacket", getClass("{nms}.Packet")).invoke(playerConnection, packet);
@@ -740,7 +770,7 @@ public class JSONMessage{
                 e.printStackTrace();
             }
         }
-        
+
         static Object createTitlePacket(String message) {
             if (!SETUP) {
                 throw new IllegalStateException("ReflectionHelper is not set up!");
@@ -751,9 +781,9 @@ public class JSONMessage{
                 e.printStackTrace();
                 return null;
             }
-            
+
         }
-        
+
         static Object createSubtitlePacket(String message) {
             if (!SETUP) {
                 throw new IllegalStateException("ReflectionHelper is not set up!");
@@ -764,9 +794,9 @@ public class JSONMessage{
                 e.printStackTrace();
                 return null;
             }
-            
+
         }
-        
+
         static Object createTitleTimesPacket(int fadeIn, int stay, int fadeOut) {
             if (!SETUP) {
                 throw new IllegalStateException("ReflectionHelper is not set up!");
@@ -777,9 +807,9 @@ public class JSONMessage{
                 e.printStackTrace();
                 return null;
             }
-            
+
         }
-        
+
         /**
          * Creates a ChatComponentText from plain text
          *
@@ -796,9 +826,9 @@ public class JSONMessage{
                 e.printStackTrace();
                 return null;
             }
-            
+
         }
-        
+
         /**
          * Attempts to convert a String representing a JSON message into a usable object
          *
@@ -812,16 +842,16 @@ public class JSONMessage{
             if (!json.trim().startsWith("{")) {
                 return componentText(json);
             }
-            
+
             try {
                 return STRING_TO_CHAT.invoke(json);
             } catch (Throwable e) {
                 e.printStackTrace();
                 return null;
             }
-            
+
         }
-        
+
         /**
          * Returns a class with the given package and name. This method replaces <code>{nms}</code> with <code>net.minecraft.server.[version]</code> and <code>{obc}</code> with <code>org.bukkit.craft.[version]</code>
          * <br>
@@ -842,7 +872,7 @@ public class JSONMessage{
             }
             return Class.forName(path.replace("{nms}", "net.minecraft.server." + version).replace("{obc}", "org.bukkit.craftbukkit." + version));
         }
-        
+
         /**
          * Sets a field with the given name on an object to the value specified
          *
@@ -859,11 +889,7 @@ public class JSONMessage{
                 e.printStackTrace();
             }
         }
-        
-        public static String getStringVersion() {
-            return version;
-        }
-        
+
         static int getVersion() {
             if (!SETUP) {
                 throw new IllegalStateException("ReflectionHelper is not set up!");
@@ -874,11 +900,11 @@ public class JSONMessage{
                 e.printStackTrace();
                 return 10;
             }
-            
+
         }
-        
+
     }
-    
+
     /**
      * Defines a section of the message, and represents the format that all JSON messages must follow in Minecraft.
      * <br>
@@ -888,18 +914,18 @@ public class JSONMessage{
      * @author Rayzr
      */
     public static class MessagePart {
-        
+
         private final List<ChatColor> styles = new ArrayList<>();
         private MessageEvent onClick;
         private MessageEvent onHover;
         private String color;
         private String font;
         private String text;
-        
+
         public MessagePart(String text) {
             this.text = text == null ? "null" : text;
         }
-        
+
         /**
          * Converts this {@link MessagePart} into a {@link JsonObject}
          *
@@ -907,34 +933,34 @@ public class JSONMessage{
          */
         public JsonObject toJSON() {
             Objects.requireNonNull(text);
-            
+
             JsonObject obj = new JsonObject();
             obj.addProperty("text", text);
-            
+
             if (color != null && !color.isEmpty()) {
                 obj.addProperty("color", color.toLowerCase());
             }
-            
+
             for (ChatColor style : styles) {
                 obj.addProperty(stylesToNames.get(style), true);
             }
-            
+
             if (onClick != null) {
                 obj.add("clickEvent", onClick.toJSON());
             }
-            
+
             if (onHover != null) {
                 obj.add("hoverEvent", onHover.toJSON());
             }
-            
+
             if (font != null) {
                 obj.addProperty("font", font);
             }
-            
+
             return obj;
-            
+
         }
-        
+
         /**
          * @return This {@link MessagePart} in legacy-style color/formatting codes
          */
@@ -946,69 +972,62 @@ public class JSONMessage{
             styles.stream()
                     .map(ChatColor::toString)
                     .forEach(output::append);
-            
+
             return output.append(text).toString();
         }
-        
+
         /**
          * @return The click event bound
          */
         public MessageEvent getOnClick() {
             return onClick;
         }
-        
+
         /**
          * @param onClick The new click event to bind
          */
         public void setOnClick(MessageEvent onClick) {
             this.onClick = onClick;
         }
-        
+
         /**
          * @return The hover event bound
          */
         public MessageEvent getOnHover() {
             return onHover;
         }
-        
+
         /**
          * @param onHover The new hover event to bind
          */
         public void setOnHover(MessageEvent onHover) {
             this.onHover = onHover;
         }
-        
+
         /**
          * @return The color
          */
         public String getColor() {
             return color;
         }
-        
+
         /**
          * @param color The color to set
          */
-        public void setColor(ChatColor color) {
-            if (!color.isColor()) {
-                throw new IllegalArgumentException(color.name() + " is not a color!");
-            }
-            setColor(color.name().toLowerCase());
-        }
-        
         public void setColor(String color) {
-            if(color == null || color.isEmpty()){
+            if (color == null || color.isEmpty()) {
                 throw new IllegalArgumentException("Color cannot be null!");
             }
             this.color = color;
         }
-        
+
         /**
          * @return The list of styles
          */
         public List<ChatColor> getStyles() {
             return styles;
         }
-        
+
         /**
          * @param style The new style to add
          */
@@ -1021,33 +1040,34 @@ public class JSONMessage{
             }
             styles.add(style);
         }
-    
+
         /**
          * @return The font used
          */
         public String getFont() {
             return font;
         }
-    
+
         /**
          * @param font The font to use
          */
         public void setFont(String font) {
             this.font = font;
         }
-        
+
         /**
          * @return The raw text
          */
         public String getText() {
             return text;
         }
-        
+
         /**
          * @param text The raw text to set
          */
         public void setText(String text) {
             this.text = text;
         }
-        
+
     }
+}
