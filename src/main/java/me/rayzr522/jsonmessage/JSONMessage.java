@@ -1007,8 +1007,39 @@ public class JSONMessage {
         /**
          * @return The color
          */
-        public String getColor() {
+        public String getColorValue() {
             return color;
+        }
+
+        /**
+         * @return The color
+         */
+        @Deprecated
+        public ChatColor getColor() {
+            if(this.color == null || this.color.isEmpty())
+                return ChatColor.WHITE;
+
+            if(this.color.startsWith("#") && ReflectionHelper.MAJOR_VER < 16)
+                throw new IllegalStateException("Custom Hex colors can only be used in Minecraft 1.16 or newer!");
+
+            ChatColor color;
+            try {
+                color = ChatColor.valueOf(this.color.toUpperCase());
+            } catch (Exception ex) {
+                color = ChatColor.WHITE;
+            }
+
+            return color;
+        }
+
+        /**
+         * @param color The color to set
+         * 
+         * @deprecated Use {@link #setColor(String)} instead
+         */
+        @Deprecated
+        public void setColor(ChatColor color) {
+            setColor(color.name().toLowerCase());
         }
 
         /**
