@@ -207,8 +207,7 @@ public class JSONMessage {
     public JSONMessage color(ChatColor color) {
         if (!color.isColor())
             throw new IllegalArgumentException(color.name() + " is not a color.");
-        last().setColor(color.name().toLowerCase());
-        return this;
+        return color(color.name().toLowerCase(), ChatColor.WHITE);
     }
 
     /**
@@ -1013,23 +1012,19 @@ public class JSONMessage {
 
         /**
          * @return The color
+         * 
+         * @deprecated Use {@link #getColorValue()} instead
          */
         @Deprecated
         public ChatColor getColor() {
-            if(this.color == null || this.color.isEmpty())
-                return ChatColor.WHITE;
-
             if(this.color.startsWith("#") && ReflectionHelper.MAJOR_VER < 16)
                 throw new IllegalStateException("Custom Hex colors can only be used in Minecraft 1.16 or newer!");
 
-            ChatColor color;
             try {
-                color = ChatColor.valueOf(this.color.toUpperCase());
+                return ChatColor.valueOf(this.color.toUpperCase());
             } catch (Exception ex) {
-                color = ChatColor.WHITE;
+                return null;
             }
-
-            return color;
         }
 
         /**
