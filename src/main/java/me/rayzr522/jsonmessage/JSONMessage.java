@@ -628,23 +628,24 @@ public class JSONMessage {
     private static class ReflectionHelper {
 
         private static final String version;
-        private static Class<?> craftPlayer;
         private static Constructor<?> chatComponentText;
+
         private static Class<?> packetPlayOutChat;
         private static Field packetPlayOutChatComponent;
         private static Field packetPlayOutChatMessageType;
         private static Field packetPlayOutChatUuid;
-        private static Class<?> packetPlayOutTitle;
-        private static Class<?> iChatBaseComponent;
-        private static Class<?> titleAction;
+        private static Object enumChatMessageTypeMessage;
+        private static Object enumChatMessageTypeActionbar;
+
+        private static Constructor<?> titlePacketConstructor;
+        private static Constructor<?> titleTimesPacketConstructor;
+        private static Object enumActionTitle;
+        private static Object enumActionSubtitle;
+
         private static Field connection;
         private static MethodHandle GET_HANDLE;
         private static MethodHandle SEND_PACKET;
         private static MethodHandle STRING_TO_CHAT;
-        private static Object enumActionTitle;
-        private static Object enumActionSubtitle;
-        private static Object enumChatMessage;
-        private static Object enumActionbarMessage;
         private static boolean SETUP;
         private static int MAJOR_VER = -1;
 
@@ -655,14 +656,14 @@ public class JSONMessage {
             try {
                 MAJOR_VER = Integer.parseInt(version.split("_")[1]);
 
-                craftPlayer = getClass("{obc}.entity.CraftPlayer");
+                final Class<?> craftPlayer = getClass("{obc}.entity.CraftPlayer");
                 Method getHandle = craftPlayer.getMethod("getHandle");
                 connection = getHandle.getReturnType().getField("playerConnection");
                 Method sendPacket = connection.getType().getMethod("sendPacket", getClass("{nms}.Packet"));
 
                 chatComponentText = getClass("{nms}.ChatComponentText").getConstructor(String.class);
 
-                iChatBaseComponent = getClass("{nms}.IChatBaseComponent");
+                final Class<?> iChatBaseComponent = getClass("{nms}.IChatBaseComponent");
 
                 Method stringToChat;
 
@@ -680,9 +681,12 @@ public class JSONMessage {
                 packetPlayOutChatComponent = getField(packetPlayOutChat, "a");
                 packetPlayOutChatMessageType = getField(packetPlayOutChat, "b");
                 packetPlayOutChatUuid = MAJOR_VER >= 16 ? getField(packetPlayOutChat, "c") : null;
-                packetPlayOutTitle = getClass("{nms}.PacketPlayOutTitle");
 
-                titleAction = getClass("{nms}.PacketPlayOutTitle$EnumTitleAction");
+                Class<?> packetPlayOutTitle = getClass("{nms}.PacketPlayOutTitle");
+                Class<?> titleAction = getClass("{nms}.PacketPlayOutTitle$EnumTitleAction");
+
+                titlePacketConstructor = packetPlayOutTitle.getConstructor(titleAction, iChatBaseComponent);
+                titleTimesPacketConstructor = packetPlayOutTitle.getConstructor(int.class, int.class, int.class);
 
                 enumActionTitle = titleAction.getField("TITLE").get(null);
                 enumActionSubtitle = titleAction.getField("SUBTITLE").get(null);
@@ -690,8 +694,8 @@ public class JSONMessage {
                 if (MAJOR_VER >= 12) {
                     Method getChatMessageType = getClass("{nms}.ChatMessageType").getMethod("a", byte.class);
 
-                    enumChatMessage = getChatMessageType.invoke(null, (byte) 1);
-                    enumActionbarMessage = getChatMessageType.invoke(null, (byte) 2);
+                    enumChatMessageTypeMessage = getChatMessageType.invoke(null, (byte) 1);
+                    enumChatMessageTypeActionbar = getChatMessageType.invoke(null, (byte) 2);
                 }
 
                 SETUP = true;
@@ -746,7 +750,7 @@ public class JSONMessage {
             assertIsSetup();
 
             try {
-                return packetPlayOutTitle.getConstructor(titleAction, iChatBaseComponent).newInstance(enumActionTitle, fromJson(message));
+                return titlePacketConstructor.newInstance(enumActionTitle, fromJson(message));
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -757,7 +761,7 @@ public class JSONMessage {
             assertIsSetup();
 
             try {
-                return packetPlayOutTitle.getConstructor(int.class, int.class, int.class).newInstance(fadeIn, stay, fadeOut);
+                return titleTimesPacketConstructor.newInstance(fadeIn, stay, fadeOut);
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -768,7 +772,7 @@ public class JSONMessage {
             assertIsSetup();
 
             try {
-                return packetPlayOutTitle.getConstructor(titleAction, iChatBaseComponent).newInstance(enumActionSubtitle, fromJson(message));
+                return titlePacketConstructor.newInstance(enumActionSubtitle, fromJson(message));
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -785,10 +789,10 @@ public class JSONMessage {
 
             switch (type) {
                 case 1:
-                    setFieldValue(packetPlayOutChatMessageType, chatPacket, enumChatMessage);
+                    setFieldValue(packetPlayOutChatMessageType, chatPacket, enumChatMessageTypeMessage);
                     break;
                 case 2:
-                    setFieldValue(packetPlayOutChatMessageType, chatPacket, enumActionbarMessage);
+                    setFieldValue(packetPlayOutChatMessageType, chatPacket, enumChatMessageTypeActionbar);
                     break;
                 default:
                     throw new IllegalArgumentException("type must be 1 or 2");
