@@ -891,6 +891,7 @@ public class JSONMessage {
         private MessageEvent onClick;
         private MessageEvent onHover;
         private String color;
+        private ChatColor legacyColor;
         private String font;
         private String text;
 
@@ -938,9 +939,12 @@ public class JSONMessage {
          */
         public String toLegacy() {
             StringBuilder output = new StringBuilder();
-            if (color != null) {
-                output.append(color);
+            ChatColor legacyColor = getColor();
+
+            if (legacyColor != null) {
+                output.append(legacyColor);
             }
+
             styles.stream()
                     .map(ChatColor::toString)
                     .forEach(output::append);
@@ -989,6 +993,10 @@ public class JSONMessage {
          */
         @Deprecated
         public ChatColor getColor() {
+            if (legacyColor != null) {
+                return legacyColor;
+            }
+
             if (this.color.startsWith("#") && ReflectionHelper.MAJOR_VER < 16)
                 throw new IllegalStateException("Custom Hex colors can only be used in Minecraft 1.16 or newer!");
 
@@ -1005,14 +1013,15 @@ public class JSONMessage {
          */
         @Deprecated
         public void setColor(ChatColor color) {
-            setColor(color.name().toLowerCase());
+            setColor(color == null ? null : color.name().toLowerCase());
+            legacyColor = color;
         }
 
         /**
          * @param color The color to set
          */
         public void setColor(String color) {
-            if (color == null || color.isEmpty()) {
+            if (color != null && color.isEmpty()) {
                 throw new IllegalArgumentException("Color cannot be null!");
             }
             this.color = color;
