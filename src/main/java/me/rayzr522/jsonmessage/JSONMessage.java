@@ -431,8 +431,9 @@ public class JSONMessage {
             for (; ; current++) {
                 MessagePart part = current < parts.size() ? parts.get(current) : null;
                 String raw = part == null ? null : ChatColor.stripColor(part.toLegacy());
+                int rawLength = raw == null ? 0 : raw.length();
 
-                if (current >= parts.size() || totalLineLength + raw.length() >= 53) {
+                if (current >= parts.size() || totalLineLength + rawLength >= 53) {
                     int padding = Math.max(0, (53 - totalLineLength) / 2);
                     currentLine.firstElement().setText(Strings.repeat(" ", padding) + currentLine.firstElement().getText());
                     currentLine.lastElement().setText(currentLine.lastElement().getText() + "\n");
@@ -440,7 +441,7 @@ public class JSONMessage {
                     break;
                 }
 
-                totalLineLength += raw.length();
+                totalLineLength += rawLength;
                 currentLine.add(part);
             }
         }
