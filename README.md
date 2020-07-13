@@ -6,6 +6,7 @@ This library aims to completely replace [Fanciful](https://bukkit.org/threads/li
 
 ## Installation
 
+### Maven
 For those of you using Maven, just add the following to your `pom.xml` file:
 
 ```xml
@@ -22,6 +23,23 @@ For those of you using Maven, just add the following to your `pom.xml` file:
     <version>1.2.0</version>
 </dependency>
 ```
+
+### Gradle
+If you're using Gradle, add this to your `build.gradle` file:
+
+```gradle
+repositories {
+    maven { url 'https://rayzr.dev/repo/' }
+}
+```
+
+```gradle
+dependencies {
+    compile 'me.rayzr522:jsonmessage:1.2.0'
+}
+```
+
+### Other
 
 Otherwise, just drag n' drop the [single class file](https://github.com/Rayzr522/JSONMessage/blob/master/src/main/java/me/rayzr522/jsonmessage/JSONMessage.java) into your project.
 > If you are not yet using Maven, you should be. Really, you should. It's amazing.
@@ -151,6 +169,8 @@ Method             | Description
 `bar(int)`         | Creates a horizontal divider bar of the given length
 `create(String)`   | Creates a new JSONMessage with the given text as a starting point
 `color(ChatColor)` | Sets the color of the current message part
+`color(String)`    | Same as `color(ChatColor)` but allows the usage of HEX colors in 1.16 and newer
+`font(String)`     | Changes the font used for the text. Only usable in 1.16 and newer
 `newline()`        | Inserts a newline. It really isn't necessary, you can just use `\n` if you want
 `style(ChatColor)` | Adds a style to the current message part
 `then(String)`     | Adds another part to the message
