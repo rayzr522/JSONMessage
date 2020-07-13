@@ -29,13 +29,13 @@ If you're using Gradle, add this to your `build.gradle` file:
 
 ```gradle
 repositories {
-    maven { url = "https://rayzr.dev/repo/" }
+    maven { url 'https://rayzr.dev/repo/' }
 }
 ```
 
 ```gradle
 dependencies {
-    compile('me.rayzr522:jsonmessage:1.2.0')
+    compile 'me.rayzr522:jsonmessage:1.2.0'
 }
 ```
 
