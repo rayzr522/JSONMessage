@@ -7,6 +7,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -15,14 +16,17 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.Vector;
 
 /**
  * This is a complete JSON message builder class. To create a new JSONMessage do
  * {@link #create(String)}
- * 
+ *
  * @author Rayzr
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -160,8 +164,8 @@ public class JSONMessage {
      */
     public void send(Player... players) {
         if (ReflectionHelper.MAJOR_VER >= 16) {
-            ReflectionHelper.sendTextPacket(toString(), players);
-            return;
+//            ReflectionHelper.sendTextPacket(toString(), players);
+//            return;
         }
 
         ReflectionHelper.sendPacket(ReflectionHelper.createTextPacket(toString()), players);
@@ -226,9 +230,9 @@ public class JSONMessage {
      * Sets the color of the current message part.
      * <br>If the provided color is a hex color ({@code #rrggbb}) but the major version of MC is older than 1.16 will the provided
      * default ChatColor be used instead.
-     * 
+     *
      * @param color The color to set
-     * @param def The default ChatColor to use, when MC version is older than 1.16
+     * @param def   The default ChatColor to use, when MC version is older than 1.16
      * @return This {@link JSONMessage} instance
      */
     public JSONMessage color(String color, ChatColor def) {
@@ -242,14 +246,14 @@ public class JSONMessage {
     /**
      * Sets the font of the current message part.
      * <br>When this is used on versions older than 1.16 will this do nothing.
-     * 
+     *
      * @param font The font to set
      * @return This {@link JSONMessage} instance
      */
     public JSONMessage font(String font) {
         if (ReflectionHelper.MAJOR_VER < 16)
             return this;
-        
+
         last().setFont(font);
         return this;
     }
@@ -627,6 +631,9 @@ public class JSONMessage {
         private static Class<?> craftPlayer;
         private static Constructor<?> chatComponentText;
         private static Class<?> packetPlayOutChat;
+        private static Field packetPlayOutChatComponent;
+        private static Field packetPlayOutChatMessageType;
+        private static Field packetPlayOutChatUuid;
         private static Class<?> packetPlayOutTitle;
         private static Class<?> iChatBaseComponent;
         private static Class<?> titleAction;
@@ -646,9 +653,7 @@ public class JSONMessage {
             version = split[split.length - 1];
 
             try {
-                SETUP = true;
-
-                MAJOR_VER = getVersion();
+                MAJOR_VER = Integer.parseInt(version.split("_")[1]);
 
                 craftPlayer = getClass("{obc}.entity.CraftPlayer");
                 Method getHandle = craftPlayer.getMethod("getHandle");
@@ -672,6 +677,9 @@ public class JSONMessage {
                 STRING_TO_CHAT = MethodHandles.lookup().unreflect(stringToChat);
 
                 packetPlayOutChat = getClass("{nms}.PacketPlayOutChat");
+                packetPlayOutChatComponent = getField(packetPlayOutChat, "a");
+                packetPlayOutChatMessageType = getField(packetPlayOutChat, "b");
+                packetPlayOutChatUuid = MAJOR_VER >= 16 ? getField(packetPlayOutChat, "c") : null;
                 packetPlayOutTitle = getClass("{nms}.PacketPlayOutTitle");
 
                 titleAction = getClass("{nms}.PacketPlayOutTitle$EnumTitleAction");
@@ -686,17 +694,16 @@ public class JSONMessage {
                     enumActionbarMessage = getChatMessageType.invoke(null, (byte) 2);
                 }
 
+                SETUP = true;
             } catch (Exception e) {
                 e.printStackTrace();
                 SETUP = false;
             }
-
         }
 
         static void sendPacket(Object packet, Player... players) {
-            if (!SETUP) {
-                throw new IllegalStateException("ReflectionHelper is not set up!");
-            }
+            assertIsSetup();
+
             if (packet == null) {
                 return;
             }
@@ -712,102 +719,80 @@ public class JSONMessage {
 
         }
 
-        private static void setType(Object object, byte type) {
-            if (MAJOR_VER < 12) {
-                set("b", object, type);
-                return;
-            }
-
-            switch (type) {
-                case 1:
-                    set("b", object, enumChatMessage);
-                    break;
-                case 2:
-                    set("b", object, enumActionbarMessage);
-                    break;
-                default:
-                    throw new IllegalArgumentException("type must be 1 or 2");
-            }
-        }
-
         static Object createActionbarPacket(String message) {
-            if (!SETUP) {
-                throw new IllegalStateException("ReflectionHelper is not set up!");
-            }
+            assertIsSetup();
+
             Object packet = createTextPacket(message);
             setType(packet, (byte) 2);
             return packet;
         }
 
         static Object createTextPacket(String message) {
-            if (!SETUP) {
-                throw new IllegalStateException("ReflectionHelper is not set up!");
-            }
+            assertIsSetup();
+
             try {
                 Object packet = packetPlayOutChat.newInstance();
-                set("a", packet, fromJson(message));
+                setFieldValue(packetPlayOutChatComponent, packet, fromJson(message));
+                setFieldValue(packetPlayOutChatUuid, packet, UUID.randomUUID());
                 setType(packet, (byte) 1);
                 return packet;
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
-
-        }
-
-        static void sendTextPacket(String message, Player... players) {
-            try {
-                for (Player player : players) {
-                    Class chatTypeClass = getClass("{nms}.ChatMessageType");
-                    Constructor<?> constructor = packetPlayOutChat.getConstructor(getClass("{nms}.IChatBaseComponent"), chatTypeClass, UUID.class);
-                    Object packet = constructor.newInstance(fromJson(message), Enum.valueOf(chatTypeClass, "CHAT"), player.getUniqueId());
-
-                    Object handler = player.getClass().getMethod("getHandle").invoke(player);
-                    Object playerConnection = handler.getClass().getField("playerConnection").get(handler);
-                    playerConnection.getClass().getMethod("sendPacket", getClass("{nms}.Packet")).invoke(playerConnection, packet);
-                }
-            } catch (IllegalArgumentException | NoSuchMethodException | NoSuchFieldException | IllegalAccessException | InvocationTargetException | InstantiationException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
         }
 
         static Object createTitlePacket(String message) {
-            if (!SETUP) {
-                throw new IllegalStateException("ReflectionHelper is not set up!");
-            }
+            assertIsSetup();
+
             try {
                 return packetPlayOutTitle.getConstructor(titleAction, iChatBaseComponent).newInstance(enumActionTitle, fromJson(message));
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
-
-        }
-
-        static Object createSubtitlePacket(String message) {
-            if (!SETUP) {
-                throw new IllegalStateException("ReflectionHelper is not set up!");
-            }
-            try {
-                return packetPlayOutTitle.getConstructor(titleAction, iChatBaseComponent).newInstance(enumActionSubtitle, fromJson(message));
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-
         }
 
         static Object createTitleTimesPacket(int fadeIn, int stay, int fadeOut) {
-            if (!SETUP) {
-                throw new IllegalStateException("ReflectionHelper is not set up!");
-            }
+            assertIsSetup();
+
             try {
                 return packetPlayOutTitle.getConstructor(int.class, int.class, int.class).newInstance(fadeIn, stay, fadeOut);
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
+        }
 
+        static Object createSubtitlePacket(String message) {
+            assertIsSetup();
+
+            try {
+                return packetPlayOutTitle.getConstructor(titleAction, iChatBaseComponent).newInstance(enumActionSubtitle, fromJson(message));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        private static void setType(Object chatPacket, byte type) {
+            assertIsSetup();
+
+            if (MAJOR_VER < 12) {
+                setFieldValue(packetPlayOutChatMessageType, chatPacket, type);
+                return;
+            }
+
+            switch (type) {
+                case 1:
+                    setFieldValue(packetPlayOutChatMessageType, chatPacket, enumChatMessage);
+                    break;
+                case 2:
+                    setFieldValue(packetPlayOutChatMessageType, chatPacket, enumActionbarMessage);
+                    break;
+                default:
+                    throw new IllegalArgumentException("type must be 1 or 2");
+            }
         }
 
         /**
@@ -817,9 +802,8 @@ public class JSONMessage {
          * @return The chat component
          */
         static Object componentText(String message) {
-            if (!SETUP) {
-                throw new IllegalStateException("ReflectionHelper is not set up!");
-            }
+            assertIsSetup();
+
             try {
                 return chatComponentText.newInstance(message);
             } catch (Exception e) {
@@ -836,9 +820,8 @@ public class JSONMessage {
          * @return The object representing the text in JSON form, or <code>null</code> if something went wrong converting the String to JSON data
          */
         static Object fromJson(String json) {
-            if (!SETUP) {
-                throw new IllegalStateException("ReflectionHelper is not set up!");
-            }
+            assertIsSetup();
+
             if (!json.trim().startsWith("{")) {
                 return componentText(json);
             }
@@ -849,60 +832,45 @@ public class JSONMessage {
                 e.printStackTrace();
                 return null;
             }
-
         }
 
-        /**
-         * Returns a class with the given package and name. This method replaces <code>{nms}</code> with <code>net.minecraft.server.[version]</code> and <code>{obc}</code> with <code>org.bukkit.craft.[version]</code>
-         * <br>
-         * <br>
-         * Example:
-         *
-         * <pre>
-         * Class<?> entityPlayer = ReflectionHelper.getClass("{nms}.EntityPlayer");
-         * </pre>
-         *
-         * @param path The path to the {@link Class}
-         * @return The class
-         * @throws ClassNotFoundException If the class was not found
-         */
-        static Class<?> getClass(String path) throws ClassNotFoundException {
+        private static void assertIsSetup() {
             if (!SETUP) {
-                throw new IllegalStateException("ReflectionHelper is not set up!");
+                throw new IllegalStateException("JSONMessage.ReflectionHelper is not set up yet!");
             }
+        }
+
+        private static Class<?> getClass(String path) throws ClassNotFoundException {
             return Class.forName(path.replace("{nms}", "net.minecraft.server." + version).replace("{obc}", "org.bukkit.craftbukkit." + version));
         }
 
-        /**
-         * Sets a field with the given name on an object to the value specified
-         *
-         * @param field The name of the field to change
-         * @param obj   The object to change the field of
-         * @param value The new value to set
-         */
-        static void set(String field, Object obj, Object value) {
+        private static void setFieldValue(Field field, Object instance, Object value) {
+            if (field == null) {
+                // useful for fields that might not exist
+                return;
+            }
+
             try {
-                Field f = obj.getClass().getDeclaredField(field);
-                f.setAccessible(true);
-                f.set(obj, value);
-            } catch (Exception e) {
+                field.set(instance, value);
+            } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
 
-        static int getVersion() {
-            if (!SETUP) {
-                throw new IllegalStateException("ReflectionHelper is not set up!");
-            }
+        private static Field getField(Class<?> classObject, String fieldName) {
             try {
-                return Integer.parseInt(version.split("_")[1]);
-            } catch (NumberFormatException e) {
+                Field field = classObject.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                return field;
+            } catch (NoSuchFieldException e) {
                 e.printStackTrace();
-                return 10;
+                return null;
             }
-
         }
 
+        private static int getVersion() {
+            return MAJOR_VER;
+        }
     }
 
     /**
@@ -1013,12 +981,11 @@ public class JSONMessage {
 
         /**
          * @return The color
-         * 
          * @deprecated Use {@link #getColorValue()} instead
          */
         @Deprecated
         public ChatColor getColor() {
-            if(this.color.startsWith("#") && ReflectionHelper.MAJOR_VER < 16)
+            if (this.color.startsWith("#") && ReflectionHelper.MAJOR_VER < 16)
                 throw new IllegalStateException("Custom Hex colors can only be used in Minecraft 1.16 or newer!");
 
             try {
@@ -1030,7 +997,6 @@ public class JSONMessage {
 
         /**
          * @param color The color to set
-         * 
          * @deprecated Use {@link #setColor(String)} instead
          */
         @Deprecated
