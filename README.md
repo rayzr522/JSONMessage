@@ -71,7 +71,7 @@ One thing to note about tooltips is that they *themselves* can actually take a J
 
 ```java
 JSONMessage.create("This has a fancy tooltip!")
-              .color(ChatColor.GOLD);
+              .color(ChatColor.GOLD)
               .tooltip(JSONMessage.create("Green text!")
                                     .color(ChatColor.GREEN)
                                     .style(ChatColor.BOLD)
