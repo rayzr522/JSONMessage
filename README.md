@@ -20,7 +20,7 @@ For those of you using Maven, just add the following to your `pom.xml` file:
 <dependency>
     <groupId>me.rayzr522</groupId>
     <artifactId>jsonmessage</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
 </dependency>
 ```
 
@@ -35,7 +35,7 @@ repositories {
 
 ```gradle
 dependencies {
-    compile 'me.rayzr522:jsonmessage:1.2.0'
+    compile 'me.rayzr522:jsonmessage:1.2.1'
 }
 ```
 
