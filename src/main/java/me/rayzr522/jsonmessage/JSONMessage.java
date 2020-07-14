@@ -211,7 +211,9 @@ public class JSONMessage {
     public JSONMessage color(ChatColor color) {
         if (!color.isColor())
             throw new IllegalArgumentException(color.name() + " is not a color.");
-        return color(color.name().toLowerCase(), ChatColor.WHITE);
+
+        last().setColor(color);
+        return this;
     }
 
     /**
@@ -1014,6 +1016,15 @@ public class JSONMessage {
         @Deprecated
         public void setColor(ChatColor color) {
             setColor(color == null ? null : color.name().toLowerCase());
+            setLegacyColor(color);
+        }
+
+        /**
+         * @param color The legacy ChatColor to set
+         * @deprecated Use {@link #setColor(String)} instead
+         */
+        @Deprecated
+        public void setLegacyColor(ChatColor color) {
             legacyColor = color;
         }
 
