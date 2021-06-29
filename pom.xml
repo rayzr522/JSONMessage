@@ -5,7 +5,7 @@
 
 	<groupId>me.rayzr522</groupId>
 	<artifactId>jsonmessage</artifactId>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 	<name>JSONMessage</name>
 	<description>A modern implementation of Fanciful</description>
 
