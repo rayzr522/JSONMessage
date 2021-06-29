@@ -134,6 +134,24 @@ class ReflectionHelper {
         }
     }
 
+    static void sendPacket(Object packet, Player... players) {
+        assertIsSetup();
+
+        if (packet == null) {
+            return;
+        }
+
+        for (Player player : players) {
+            try {
+                SEND_PACKET.bindTo(connection.get(GET_HANDLE.bindTo(player).invoke())).invoke(packet);
+            } catch (Throwable e) {
+                System.err.println("Failed to send packet");
+                e.printStackTrace();
+            }
+        }
+
+    }
+
     static Object createActionbarPacket(String message) {
         assertIsSetup();
 
