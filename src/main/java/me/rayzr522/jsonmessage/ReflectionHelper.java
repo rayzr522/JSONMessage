@@ -8,6 +8,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.UUID;
 
 class ReflectionHelper {
@@ -15,7 +16,7 @@ class ReflectionHelper {
     private static final String version;
     private static Constructor<?> chatComponentText;
 
-    private static Class<?> packetPlayOutChat;
+    private static Constructor<?> chatPacketContructor;
     private static Field packetPlayOutChatComponent;
     private static Field packetPlayOutChatMessageType;
     private static Field packetPlayOutChatUuid;
@@ -41,43 +42,86 @@ class ReflectionHelper {
         try {
             MAJOR_VER = Integer.parseInt(version.split("_")[1]);
 
+            Class<?> NMS_PLAYER_CONNECTION;
+            Class<?> NMS_PACKET;
+            Class<?> NMS_CHAT_COMPONENT_TEXT;
+            Class<?> NMS_I_CHAT_BASE_COMPONENT;
+            Class<?> NMS_CHAT_SERIALIZER;
+            Class<?> NMS_PACKET_PLAY_OUT_CHAT;
+            Class<?> NMS_PACKET_PLAY_OUT_TITLE;
+            Class<?> NMS_ENUM_TITLE_ACTION;
+            Class<?> NMS_CHAT_MESSAGE_TYPE;
+
+            if (MAJOR_VER <= 16) {
+                NMS_PLAYER_CONNECTION = getClass("{nms}.PlayerConnection");
+                NMS_PACKET = getClass("{nms}.Packet");
+                NMS_CHAT_COMPONENT_TEXT = getClass("{nms}.ChatComponentText");
+                NMS_I_CHAT_BASE_COMPONENT = getClass("{nms}.IChatBaseComponent");
+                NMS_PACKET_PLAY_OUT_CHAT = getClass("{nms}.PacketPlayOutChat");
+                NMS_PACKET_PLAY_OUT_TITLE = getClass("{nms}.PacketPlayOutTitle");
+
+                if (MAJOR_VER < 8) {
+                    NMS_CHAT_SERIALIZER = getClass("{nms}.ChatSerializer");
+                } else {
+                    NMS_CHAT_SERIALIZER = getClass("{nms}.IChatBaseComponent$ChatSerializer");
+                }
+
+                if (MAJOR_VER >= 12) {
+                    NMS_CHAT_MESSAGE_TYPE = getClass("{nms}.ChatMessageType");
+                } else {
+                    NMS_CHAT_MESSAGE_TYPE = null;
+                }
+            } else {
+                NMS_PLAYER_CONNECTION = getClass("net.minecraft.server.PlayerConnection");
+                NMS_PACKET = getClass("net.minecraft.network.protocol.Packet");
+                NMS_CHAT_COMPONENT_TEXT = getClass("net.minecraft.network.chat.ChatComponentText");
+                NMS_I_CHAT_BASE_COMPONENT = getClass("net.minecraft.network.chat.IChatBaseComponent");
+                NMS_CHAT_SERIALIZER = getClass("net.minecraft.network.chat.ChatSerializer.IChatBaseComponent$ChatSerializer");
+                NMS_PACKET_PLAY_OUT_CHAT = getClass("net.minecraft.network.protocol.game.PacketPlayOutChat");
+                NMS_PACKET_PLAY_OUT_TITLE = getClass("{nms}.PacketPlayOutTitle");
+                NMS_CHAT_MESSAGE_TYPE = getClass("net.minecraft.network.chat.ChatMessageType");
+            }
+
+
             final Class<?> craftPlayer = getClass("{obc}.entity.CraftPlayer");
             Method getHandle = craftPlayer.getMethod("getHandle");
-            connection = getHandle.getReturnType().getField("playerConnection");
-            Method sendPacket = connection.getType().getMethod("sendPacket", getClass("{nms}.Packet"));
-
-            chatComponentText = getClass("{nms}.ChatComponentText").getConstructor(String.class);
-
-            final Class<?> iChatBaseComponent = getClass("{nms}.IChatBaseComponent");
-
-            Method stringToChat;
-
-            if (MAJOR_VER < 8) {
-                stringToChat = getClass("{nms}.ChatSerializer").getMethod("a", String.class);
-            } else {
-                stringToChat = getClass("{nms}.IChatBaseComponent$ChatSerializer").getMethod("a", String.class);
+            Class<?> entityPlayer = getHandle.getReturnType();
+            try {
+                connection = entityPlayer.getDeclaredField("playerConnection");
+            } catch (NoSuchFieldException e) {
+                // in ver 1.17+ it's no longer called playerConnection, so we have to find it in a... less intuitive manner
+                connection = Arrays.stream(entityPlayer.getDeclaredFields())
+                        .filter(field -> field.getType().equals(NMS_PLAYER_CONNECTION))
+                        .findFirst()
+                        .orElseThrow(() -> new Error("Could not find PlayerConnection variable in EntityPlayer."));
             }
+            Method sendPacket = connection.getType().getMethod("sendPacket", NMS_PACKET);
+
+            chatComponentText = NMS_CHAT_COMPONENT_TEXT.getConstructor(String.class);
+
+            final Class<?> iChatBaseComponent = NMS_I_CHAT_BASE_COMPONENT;
+
+            Method stringToChat = NMS_CHAT_SERIALIZER.getMethod("a", String.class);
 
             GET_HANDLE = MethodHandles.lookup().unreflect(getHandle);
             SEND_PACKET = MethodHandles.lookup().unreflect(sendPacket);
             STRING_TO_CHAT = MethodHandles.lookup().unreflect(stringToChat);
 
-            packetPlayOutChat = getClass("{nms}.PacketPlayOutChat");
-            packetPlayOutChatComponent = getField(packetPlayOutChat, "a");
-            packetPlayOutChatMessageType = getField(packetPlayOutChat, "b");
-            packetPlayOutChatUuid = MAJOR_VER >= 16 ? getField(packetPlayOutChat, "c") : null;
+            chatPacketContructor = NMS_PACKET_PLAY_OUT_CHAT.getConstructor();
+            packetPlayOutChatComponent = getField(NMS_PACKET_PLAY_OUT_CHAT, "a");
+            packetPlayOutChatMessageType = getField(NMS_PACKET_PLAY_OUT_CHAT, "b");
+            packetPlayOutChatUuid = MAJOR_VER >= 16 ? getField(NMS_PACKET_PLAY_OUT_CHAT, "c") : null;
 
-            Class<?> packetPlayOutTitle = getClass("{nms}.PacketPlayOutTitle");
             Class<?> titleAction = getClass("{nms}.PacketPlayOutTitle$EnumTitleAction");
 
-            titlePacketConstructor = packetPlayOutTitle.getConstructor(titleAction, iChatBaseComponent);
-            titleTimesPacketConstructor = packetPlayOutTitle.getConstructor(int.class, int.class, int.class);
+            titlePacketConstructor = NMS_PACKET_PLAY_OUT_TITLE.getConstructor(titleAction, iChatBaseComponent);
+            titleTimesPacketConstructor = NMS_PACKET_PLAY_OUT_TITLE.getConstructor(int.class, int.class, int.class);
 
             enumActionTitle = titleAction.getField("TITLE").get(null);
             enumActionSubtitle = titleAction.getField("SUBTITLE").get(null);
 
-            if (MAJOR_VER >= 12) {
-                Method getChatMessageType = getClass("{nms}.ChatMessageType").getMethod("a", byte.class);
+            if (NMS_CHAT_MESSAGE_TYPE != null) {
+                Method getChatMessageType = NMS_CHAT_MESSAGE_TYPE.getMethod("a", byte.class);
 
                 enumChatMessageTypeMessage = getChatMessageType.invoke(null, (byte) 1);
                 enumChatMessageTypeActionbar = getChatMessageType.invoke(null, (byte) 2);
@@ -88,24 +132,6 @@ class ReflectionHelper {
             e.printStackTrace();
             SETUP = false;
         }
-    }
-
-    static void sendPacket(Object packet, Player... players) {
-        assertIsSetup();
-
-        if (packet == null) {
-            return;
-        }
-
-        for (Player player : players) {
-            try {
-                SEND_PACKET.bindTo(connection.get(GET_HANDLE.bindTo(player).invoke())).invoke(packet);
-            } catch (Throwable e) {
-                System.err.println("Failed to send packet");
-                e.printStackTrace();
-            }
-        }
-
     }
 
     static Object createActionbarPacket(String message) {
@@ -120,7 +146,7 @@ class ReflectionHelper {
         assertIsSetup();
 
         try {
-            Object packet = packetPlayOutChat.newInstance();
+            Object packet = chatPacketContructor.newInstance();
             setFieldValue(packetPlayOutChatComponent, packet, fromJson(message));
             setFieldValue(packetPlayOutChatUuid, packet, UUID.randomUUID());
             setType(packet, (byte) 1);
