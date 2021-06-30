@@ -158,7 +158,7 @@ public class JSONMessage {
      * @param players The players you want to send this to
      */
     public void send(Player... players) {
-        Object component = ReflectionHelper.fromJson(toString());
+        Object component = compatManager.getChatComponent().fromJson(toJSON());
 
         compatManager.getPlayerConnection().sendPacket(
                 compatManager.getChatPacket().createTextPacket(component),
@@ -204,7 +204,7 @@ public class JSONMessage {
      * @param players The players you want to send this to
      */
     public void actionbar(Player... players) {
-        Object component = ReflectionHelper.fromJson(toLegacy());
+        Object component = compatManager.getChatComponent().createComponent(toLegacy());
 
         compatManager.getPlayerConnection().sendPacket(
                 compatManager.getChatPacket().createActionbarPacket(component),

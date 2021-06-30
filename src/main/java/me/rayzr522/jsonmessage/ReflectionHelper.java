@@ -2,26 +2,20 @@ package me.rayzr522.jsonmessage;
 
 import org.bukkit.Bukkit;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.UUID;
 
 public class ReflectionHelper {
 
     private static final String version;
-    private static Constructor<?> chatComponentText;
 
     private static Constructor<?> titlePacketConstructor;
     private static Constructor<?> titleTimesPacketConstructor;
     private static Object enumActionTitle;
     private static Object enumActionSubtitle;
 
-    private static MethodHandle STRING_TO_CHAT;
     private static boolean SETUP;
     private static int MAJOR_VER = -1;
 
@@ -32,42 +26,15 @@ public class ReflectionHelper {
         try {
             MAJOR_VER = Integer.parseInt(version.split("_")[1]);
 
-            Class<?> NMS_CHAT_COMPONENT_TEXT;
-            Class<?> NMS_I_CHAT_BASE_COMPONENT;
-            Class<?> NMS_CHAT_SERIALIZER;
-//            Class<?> NMS_PACKET_PLAY_OUT_TITLE;
+//            Class<?> NMS_PACKET_PLAY_OUT_TITLE = getClass("{nms}.PacketPlayOutTitle");
 //            Class<?> NMS_ENUM_TITLE_ACTION;
-
-            if (MAJOR_VER <= 16) {
-                NMS_CHAT_COMPONENT_TEXT = getClass("{nms}.ChatComponentText");
-                NMS_I_CHAT_BASE_COMPONENT = getClass("{nms}.IChatBaseComponent");
-//                NMS_PACKET_PLAY_OUT_TITLE = getClass("{nms}.PacketPlayOutTitle");
-
-                if (MAJOR_VER < 8) {
-                    NMS_CHAT_SERIALIZER = getClass("{nms}.ChatSerializer");
-                } else {
-                    NMS_CHAT_SERIALIZER = getClass("{nms}.IChatBaseComponent$ChatSerializer");
-                }
-            } else {
-                NMS_CHAT_COMPONENT_TEXT = getClass("net.minecraft.network.chat.ChatComponentText");
-                NMS_I_CHAT_BASE_COMPONENT = getClass("net.minecraft.network.chat.IChatBaseComponent");
-                NMS_CHAT_SERIALIZER = getClass("net.minecraft.network.chat.IChatBaseComponent$ChatSerializer");
-//                NMS_PACKET_PLAY_OUT_TITLE = getClass("{nms}.PacketPlayOutTitle");
-            }
-
-            chatComponentText = NMS_CHAT_COMPONENT_TEXT.getConstructor(String.class);
-
-            Method stringToChat = NMS_CHAT_SERIALIZER.getMethod("a", String.class);
-
-            STRING_TO_CHAT = MethodHandles.lookup().unreflect(stringToChat);
-
-//            Class<?> titleAction = getClass("{nms}.PacketPlayOutTitle$EnumTitleAction");
-
-//            titlePacketConstructor = NMS_PACKET_PLAY_OUT_TITLE.getConstructor(titleAction, NMS_I_CHAT_BASE_COMPONENT);
+//            Class<?> NMS_TITLE_ACTION = getClass("{nms}.PacketPlayOutTitle$EnumTitleAction");
+//
+//            titlePacketConstructor = NMS_PACKET_PLAY_OUT_TITLE.getConstructor(NMS_TITLE_ACTION, NMS_I_CHAT_BASE_COMPONENT);
 //            titleTimesPacketConstructor = NMS_PACKET_PLAY_OUT_TITLE.getConstructor(int.class, int.class, int.class);
-
-//            enumActionTitle = titleAction.getField("TITLE").get(null);
-//            enumActionSubtitle = titleAction.getField("SUBTITLE").get(null);
+//
+//            enumActionTitle = NMS_TITLE_ACTION.getField("TITLE").get(null);
+//            enumActionSubtitle = NMS_TITLE_ACTION.getField("SUBTITLE").get(null);
 
             SETUP = true;
         } catch (Exception e) {
@@ -80,7 +47,8 @@ public class ReflectionHelper {
         assertIsSetup();
 
         try {
-            return titlePacketConstructor.newInstance(enumActionTitle, fromJson(message));
+//            return titlePacketConstructor.newInstance(enumActionTitle, fromJson(message));
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -102,47 +70,9 @@ public class ReflectionHelper {
         assertIsSetup();
 
         try {
-            return titlePacketConstructor.newInstance(enumActionSubtitle, fromJson(message));
-        } catch (Exception e) {
-            e.printStackTrace();
+//            return titlePacketConstructor.newInstance(enumActionSubtitle, fromJson(message));
             return null;
-        }
-    }
-
-    /**
-     * Creates a ChatComponentText from plain text
-     *
-     * @param message The text to convert to a chat component
-     * @return The chat component
-     */
-    static Object componentText(String message) {
-        assertIsSetup();
-
-        try {
-            return chatComponentText.newInstance(message);
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-
-    }
-
-    /**
-     * Attempts to convert a String representing a JSON message into a usable object
-     *
-     * @param json The JSON to attempt to parse
-     * @return The object representing the text in JSON form, or <code>null</code> if something went wrong converting the String to JSON data
-     */
-    public static Object fromJson(String json) {
-        assertIsSetup();
-
-        if (!json.trim().startsWith("{")) {
-            return componentText(json);
-        }
-
-        try {
-            return STRING_TO_CHAT.invoke(json);
-        } catch (Throwable e) {
             e.printStackTrace();
             return null;
         }

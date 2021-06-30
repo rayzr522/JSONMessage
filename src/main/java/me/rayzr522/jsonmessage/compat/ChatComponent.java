@@ -1,5 +1,7 @@
 package me.rayzr522.jsonmessage.compat;
 
+import com.google.gson.JsonObject;
+
 public interface ChatComponent {
     /**
      * Creates a ChatComponentText from plain text
@@ -15,5 +17,5 @@ public interface ChatComponent {
      * @param json The JSON to attempt to parse
      * @return The object representing the text in JSON form, or <code>null</code> if something went wrong converting the String to JSON data
      */
-    Object fromJson(String json);
+    Object fromJson(JsonObject json);
 }

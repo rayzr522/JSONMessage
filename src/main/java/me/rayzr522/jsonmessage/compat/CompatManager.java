@@ -12,7 +12,14 @@ public class CompatManager {
     public CompatManager() {
         int version = ReflectionHelper.getVersion();
 
-        chatComponent = null;
+        chatComponent = new ImplementationPicker<ChatComponent>()
+                .addImplementation(8, 16, ChatComponentImpl8To16::new)
+                .addImplementation(17, Integer.MAX_VALUE, ChatComponentImpl17ToFuture::new)
+                .getImplementation(version)
+                .orElseThrow(() -> new IllegalStateException(
+                        "Missing ChatComponent implementation for major version: " + version
+                ));
+
         chatPacket = new ImplementationPicker<ChatPacket>()
                 .addImplementation(8, 11, ChatPacketImpl8To11::new)
                 .addImplementation(12, 15, ChatPacketImpl12To15::new)
@@ -22,6 +29,7 @@ public class CompatManager {
                 .orElseThrow(() -> new IllegalStateException(
                         "Missing ChatPacket implementation for major version: " + version
                 ));
+
         playerConnection = new ImplementationPicker<PlayerConnection>()
                 .addImplementation(8, 16, PlayerConnectionImpl8To16::new)
                 .addImplementation(17, Integer.MAX_VALUE, PlayerConnectImpl17ToFuture::new)
@@ -29,6 +37,7 @@ public class CompatManager {
                 .orElseThrow(() -> new IllegalStateException(
                         "Missing PlayerConnection implementation for major version: " + version
                 ));
+
         titlePacket = null;
     }
 
