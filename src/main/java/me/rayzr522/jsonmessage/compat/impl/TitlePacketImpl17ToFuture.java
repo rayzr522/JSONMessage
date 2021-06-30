@@ -1,12 +1,11 @@
 package me.rayzr522.jsonmessage.compat.impl;
 
-import com.google.common.reflect.Reflection;
 import me.rayzr522.jsonmessage.ReflectionHelper;
-import me.rayzr522.jsonmessage.compat.TitlePacket;
+import me.rayzr522.jsonmessage.compat.TitlePacketCompat;
 
 import java.lang.reflect.Constructor;
 
-public class TitlePacketImpl17ToFuture implements TitlePacket {
+public class TitlePacketImpl17ToFuture implements TitlePacketCompat {
 
     private final Constructor<?> titleTextPacketConstructor;
     private final Constructor<?> subtitleTextPacketConstructor;

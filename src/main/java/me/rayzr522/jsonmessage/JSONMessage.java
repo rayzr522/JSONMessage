@@ -8,8 +8,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import me.rayzr522.jsonmessage.compat.CompatManager;
-import me.rayzr522.jsonmessage.compat.PlayerConnection;
-import me.rayzr522.jsonmessage.compat.TitlePacket;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -27,7 +25,6 @@ import java.util.Vector;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class JSONMessage {
     private static final BiMap<ChatColor, String> stylesToNames;
-    private static final CompatManager compatManager = new CompatManager();
 
     static {
         ImmutableBiMap.Builder<ChatColor, String> builder = ImmutableBiMap.builder();
@@ -159,10 +156,10 @@ public class JSONMessage {
      * @param players The players you want to send this to
      */
     public void send(Player... players) {
-        Object component = compatManager.getChatComponent().fromJson(toJSON());
+        Object component = CompatManager.chatComponent().fromJson(toJSON());
 
-        compatManager.getPlayerConnection().sendPacket(
-                compatManager.getChatPacket().createTextPacket(component),
+        CompatManager.playerConnection().sendPacket(
+                CompatManager.chatPacket().createTextPacket(component),
                 players
         );
     }
@@ -176,16 +173,14 @@ public class JSONMessage {
      * @param players The players to send this to
      */
     public void title(int fadeIn, int stay, int fadeOut, Player... players) {
-        PlayerConnection playerConnectionCompat = compatManager.getPlayerConnection();
-        TitlePacket titlePacketCompat = compatManager.getTitlePacket();
-        Object component = compatManager.getChatComponent().fromJson(toJSON());
+        Object component = CompatManager.chatComponent().fromJson(toJSON());
 
-        playerConnectionCompat.sendPacket(
-                titlePacketCompat.createTitleTimesPacket(fadeIn, stay, fadeOut),
+        CompatManager.playerConnection().sendPacket(
+                CompatManager.titlePacket().createTitleTimesPacket(fadeIn, stay, fadeOut),
                 players
         );
-        playerConnectionCompat.sendPacket(
-                titlePacketCompat.createTitleTextPacket(component),
+        CompatManager.playerConnection().sendPacket(
+                CompatManager.titlePacket().createTitleTextPacket(component),
                 players
         );
     }
@@ -196,10 +191,10 @@ public class JSONMessage {
      * @param players The players to send this to
      */
     public void subtitle(Player... players) {
-        Object component = compatManager.getChatComponent().fromJson(toJSON());
+        Object component = CompatManager.chatComponent().fromJson(toJSON());
 
-        compatManager.getPlayerConnection().sendPacket(
-                compatManager.getTitlePacket().createSubtitlePacket(component),
+        CompatManager.playerConnection().sendPacket(
+                CompatManager.titlePacket().createSubtitlePacket(component),
                 players
         );
     }
@@ -210,10 +205,10 @@ public class JSONMessage {
      * @param players The players you want to send this to
      */
     public void actionbar(Player... players) {
-        Object component = compatManager.getChatComponent().createComponent(toLegacy());
+        Object component = CompatManager.chatComponent().createComponent(toLegacy());
 
-        compatManager.getPlayerConnection().sendPacket(
-                compatManager.getChatPacket().createActionbarPacket(component),
+        CompatManager.playerConnection().sendPacket(
+                CompatManager.chatPacket().createActionbarPacket(component),
                 players
         );
     }

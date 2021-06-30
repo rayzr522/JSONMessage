@@ -1,6 +1,6 @@
 package me.rayzr522.jsonmessage.compat;
 
-public interface TitlePacket {
+public interface TitlePacketCompat {
 
     Object createTitleTextPacket(Object chatComponent);
 

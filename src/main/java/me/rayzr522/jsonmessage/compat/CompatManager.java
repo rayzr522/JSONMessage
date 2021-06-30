@@ -4,15 +4,17 @@ import me.rayzr522.jsonmessage.ReflectionHelper;
 import me.rayzr522.jsonmessage.compat.impl.*;
 
 public class CompatManager {
-    private final ChatComponent chatComponent;
-    private final ChatPacket chatPacket;
-    private final PlayerConnection playerConnection;
-    private final TitlePacket titlePacket;
+    private static CompatManager INSTANCE;
+
+    private final ChatComponentCompat chatComponentCompat;
+    private final ChatPacketCompat chatPacketCompat;
+    private final PlayerConnectionCompat playerConnectionCompat;
+    private final TitlePacketCompat titlePacketCompat;
 
     public CompatManager() {
         int version = ReflectionHelper.getVersion();
 
-        chatComponent = new ImplementationPicker<ChatComponent>()
+        chatComponentCompat = new ImplementationPicker<ChatComponentCompat>()
                 .addImplementation(8, 16, ChatComponentImpl8To16::new)
                 .addImplementation(17, Integer.MAX_VALUE, ChatComponentImpl17ToFuture::new)
                 .getImplementation(version)
@@ -20,7 +22,7 @@ public class CompatManager {
                         "Missing ChatComponent implementation for major version: " + version
                 ));
 
-        chatPacket = new ImplementationPicker<ChatPacket>()
+        chatPacketCompat = new ImplementationPicker<ChatPacketCompat>()
                 .addImplementation(8, 11, ChatPacketImpl8To11::new)
                 .addImplementation(12, 15, ChatPacketImpl12To15::new)
                 .addImplementation(16, 16, ChatPacketImpl16::new)
@@ -30,7 +32,7 @@ public class CompatManager {
                         "Missing ChatPacket implementation for major version: " + version
                 ));
 
-        playerConnection = new ImplementationPicker<PlayerConnection>()
+        playerConnectionCompat = new ImplementationPicker<PlayerConnectionCompat>()
                 .addImplementation(8, 16, PlayerConnectionImpl8To16::new)
                 .addImplementation(17, Integer.MAX_VALUE, PlayerConnectImpl17ToFuture::new)
                 .getImplementation(version)
@@ -38,7 +40,7 @@ public class CompatManager {
                         "Missing PlayerConnection implementation for major version: " + version
                 ));
 
-        titlePacket = new ImplementationPicker<TitlePacket>()
+        titlePacketCompat = new ImplementationPicker<TitlePacketCompat>()
                 .addImplementation(8, 16, TitlePacketImpl8To16::new)
                 .addImplementation(17, Integer.MAX_VALUE, TitlePacketImpl17ToFuture::new)
                 .getImplementation(version)
@@ -47,19 +49,26 @@ public class CompatManager {
                 ));
     }
 
-    public ChatComponent getChatComponent() {
-        return chatComponent;
+    private static CompatManager get() {
+        if (INSTANCE == null) {
+            INSTANCE = new CompatManager();
+        }
+        return INSTANCE;
     }
 
-    public ChatPacket getChatPacket() {
-        return chatPacket;
+    public static ChatComponentCompat chatComponent() {
+        return get().chatComponentCompat;
     }
 
-    public PlayerConnection getPlayerConnection() {
-        return playerConnection;
+    public static ChatPacketCompat chatPacket() {
+        return get().chatPacketCompat;
     }
 
-    public TitlePacket getTitlePacket() {
-        return titlePacket;
+    public static PlayerConnectionCompat playerConnection() {
+        return get().playerConnectionCompat;
+    }
+
+    public static TitlePacketCompat titlePacket() {
+        return get().titlePacketCompat;
     }
 }

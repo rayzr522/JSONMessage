@@ -2,13 +2,13 @@ package me.rayzr522.jsonmessage.compat.impl;
 
 import com.google.gson.JsonObject;
 import me.rayzr522.jsonmessage.ReflectionHelper;
-import me.rayzr522.jsonmessage.compat.ChatComponent;
+import me.rayzr522.jsonmessage.compat.ChatComponentCompat;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 
-public class ChatComponentImpl8To16 implements ChatComponent {
+public class ChatComponentImpl8To16 implements ChatComponentCompat {
     private final Constructor<?> chatComponentText;
     private final MethodHandle STRING_TO_CHAT;
 

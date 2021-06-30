@@ -1,7 +1,7 @@
 package me.rayzr522.jsonmessage.compat.impl;
 
 import me.rayzr522.jsonmessage.ReflectionHelper;
-import me.rayzr522.jsonmessage.compat.ChatPacket;
+import me.rayzr522.jsonmessage.compat.ChatPacketCompat;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -9,7 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-public class ChatPacketImpl16 implements ChatPacket {
+public class ChatPacketImpl16 implements ChatPacketCompat {
     private final Constructor<?> chatPacketContructor;
     private final Field packetPlayOutChatComponent;
     private final Field packetPlayOutChatMessageType;

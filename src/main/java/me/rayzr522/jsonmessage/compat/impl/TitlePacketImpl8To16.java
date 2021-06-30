@@ -1,11 +1,11 @@
 package me.rayzr522.jsonmessage.compat.impl;
 
 import me.rayzr522.jsonmessage.ReflectionHelper;
-import me.rayzr522.jsonmessage.compat.TitlePacket;
+import me.rayzr522.jsonmessage.compat.TitlePacketCompat;
 
 import java.lang.reflect.Constructor;
 
-public class TitlePacketImpl8To16 implements TitlePacket {
+public class TitlePacketImpl8To16 implements TitlePacketCompat {
 
     private final Constructor<?> titlePacketConstructor;
     private final Constructor<?> titleTimesPacketConstructor;

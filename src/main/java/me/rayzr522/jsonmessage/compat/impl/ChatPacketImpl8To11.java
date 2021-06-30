@@ -1,13 +1,12 @@
 package me.rayzr522.jsonmessage.compat.impl;
 
 import me.rayzr522.jsonmessage.ReflectionHelper;
-import me.rayzr522.jsonmessage.compat.ChatPacket;
+import me.rayzr522.jsonmessage.compat.ChatPacketCompat;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.UUID;
 
-public class ChatPacketImpl8To11 implements ChatPacket {
+public class ChatPacketImpl8To11 implements ChatPacketCompat {
     private final Constructor<?> chatPacketContructor;
     private final Field packetPlayOutChatComponent;
     private final Field packetPlayOutChatMessageType;

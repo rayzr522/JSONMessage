@@ -2,7 +2,7 @@ package me.rayzr522.jsonmessage.compat;
 
 import com.google.gson.JsonObject;
 
-public interface ChatComponent {
+public interface ChatComponentCompat {
     /**
      * Creates a ChatComponentText from plain text
      *

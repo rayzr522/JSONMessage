@@ -1,14 +1,14 @@
 package me.rayzr522.jsonmessage.compat.impl;
 
 import me.rayzr522.jsonmessage.ReflectionHelper;
-import me.rayzr522.jsonmessage.compat.ChatPacket;
+import me.rayzr522.jsonmessage.compat.ChatPacketCompat;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-public class ChatPacketImpl17ToFuture implements ChatPacket {
+public class ChatPacketImpl17ToFuture implements ChatPacketCompat {
     private final Constructor<?> chatPacketContructor;
     private static Object enumChatMessageTypeMessage;
     private static Object enumChatMessageTypeActionbar;

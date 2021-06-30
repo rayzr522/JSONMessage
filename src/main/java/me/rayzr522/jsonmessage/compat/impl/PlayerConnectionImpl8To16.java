@@ -1,7 +1,7 @@
 package me.rayzr522.jsonmessage.compat.impl;
 
 import me.rayzr522.jsonmessage.ReflectionHelper;
-import me.rayzr522.jsonmessage.compat.PlayerConnection;
+import me.rayzr522.jsonmessage.compat.PlayerConnectionCompat;
 import org.bukkit.entity.Player;
 
 import java.lang.invoke.MethodHandle;
@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PlayerConnectionImpl8To16 implements PlayerConnection {
+public class PlayerConnectionImpl8To16 implements PlayerConnectionCompat {
     private static final Logger LOGGER = Logger.getLogger("PlayerConnectionImpl8To16");
 
     private final Field playerConnectionField;
