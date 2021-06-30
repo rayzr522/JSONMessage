@@ -10,78 +10,12 @@ import java.util.Optional;
 public class ReflectionHelper {
 
     private static final String version;
-
-    private static Constructor<?> titlePacketConstructor;
-    private static Constructor<?> titleTimesPacketConstructor;
-    private static Object enumActionTitle;
-    private static Object enumActionSubtitle;
-
-    private static boolean SETUP;
-    private static int MAJOR_VER = -1;
+    private static final int MAJOR_VER;
 
     static {
         String[] split = Bukkit.getServer().getClass().getPackage().getName().split("\\.");
         version = split[split.length - 1];
-
-        try {
-            MAJOR_VER = Integer.parseInt(version.split("_")[1]);
-
-//            Class<?> NMS_PACKET_PLAY_OUT_TITLE = getClass("{nms}.PacketPlayOutTitle");
-//            Class<?> NMS_ENUM_TITLE_ACTION;
-//            Class<?> NMS_TITLE_ACTION = getClass("{nms}.PacketPlayOutTitle$EnumTitleAction");
-//
-//            titlePacketConstructor = NMS_PACKET_PLAY_OUT_TITLE.getConstructor(NMS_TITLE_ACTION, NMS_I_CHAT_BASE_COMPONENT);
-//            titleTimesPacketConstructor = NMS_PACKET_PLAY_OUT_TITLE.getConstructor(int.class, int.class, int.class);
-//
-//            enumActionTitle = NMS_TITLE_ACTION.getField("TITLE").get(null);
-//            enumActionSubtitle = NMS_TITLE_ACTION.getField("SUBTITLE").get(null);
-
-            SETUP = true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            SETUP = false;
-        }
-    }
-
-    static Object createTitlePacket(String message) {
-        assertIsSetup();
-
-        try {
-//            return titlePacketConstructor.newInstance(enumActionTitle, fromJson(message));
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    static Object createTitleTimesPacket(int fadeIn, int stay, int fadeOut) {
-        assertIsSetup();
-
-        try {
-            return titleTimesPacketConstructor.newInstance(fadeIn, stay, fadeOut);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    static Object createSubtitlePacket(String message) {
-        assertIsSetup();
-
-        try {
-//            return titlePacketConstructor.newInstance(enumActionSubtitle, fromJson(message));
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static void assertIsSetup() {
-        if (!SETUP) {
-            throw new IllegalStateException("JSONMessage.ReflectionHelper is not set up yet!");
-        }
+        MAJOR_VER = Integer.parseInt(version.split("_")[1]);
     }
 
     public static Class<?> getClass(String path) throws ClassNotFoundException {
@@ -103,11 +37,6 @@ public class ReflectionHelper {
     }
 
     public static void setFieldValue(Field field, Object instance, Object value) {
-        if (field == null) {
-            // useful for fields that might not exist
-            return;
-        }
-
         try {
             field.set(instance, value);
         } catch (IllegalAccessException e) {

@@ -38,7 +38,13 @@ public class CompatManager {
                         "Missing PlayerConnection implementation for major version: " + version
                 ));
 
-        titlePacket = null;
+        titlePacket = new ImplementationPicker<TitlePacket>()
+                .addImplementation(8, 16, TitlePacketImpl8To16::new)
+                .addImplementation(17, Integer.MAX_VALUE, TitlePacketImpl17ToFuture::new)
+                .getImplementation(version)
+                .orElseThrow(() -> new IllegalStateException(
+                        "Missing TitlePacket implementation for major version: " + version
+                ));
     }
 
     public ChatComponent getChatComponent() {

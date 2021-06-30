@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import me.rayzr522.jsonmessage.compat.CompatManager;
 import me.rayzr522.jsonmessage.compat.PlayerConnection;
+import me.rayzr522.jsonmessage.compat.TitlePacket;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -176,12 +177,15 @@ public class JSONMessage {
      */
     public void title(int fadeIn, int stay, int fadeOut, Player... players) {
         PlayerConnection playerConnectionCompat = compatManager.getPlayerConnection();
+        TitlePacket titlePacketCompat = compatManager.getTitlePacket();
+        Object component = compatManager.getChatComponent().fromJson(toJSON());
+
         playerConnectionCompat.sendPacket(
-                ReflectionHelper.createTitleTimesPacket(fadeIn, stay, fadeOut),
+                titlePacketCompat.createTitleTimesPacket(fadeIn, stay, fadeOut),
                 players
         );
         playerConnectionCompat.sendPacket(
-                ReflectionHelper.createTitlePacket(toString()),
+                titlePacketCompat.createTitleTextPacket(component),
                 players
         );
     }
@@ -192,8 +196,10 @@ public class JSONMessage {
      * @param players The players to send this to
      */
     public void subtitle(Player... players) {
+        Object component = compatManager.getChatComponent().fromJson(toJSON());
+
         compatManager.getPlayerConnection().sendPacket(
-                ReflectionHelper.createSubtitlePacket(toString()),
+                compatManager.getTitlePacket().createSubtitlePacket(component),
                 players
         );
     }
@@ -751,6 +757,7 @@ public class JSONMessage {
          * @return The color
          * @deprecated Use {@link #getColorValue()} instead
          */
+        @SuppressWarnings("DeprecatedIsStillUsed")
         @Deprecated
         public ChatColor getColor() {
             if (legacyColor != null) {
@@ -771,6 +778,7 @@ public class JSONMessage {
          * @param color The color to set
          * @deprecated Use {@link #setColor(String)} instead
          */
+        @SuppressWarnings("DeprecatedIsStillUsed")
         @Deprecated
         public void setColor(ChatColor color) {
             setColor(color == null ? null : color.name().toLowerCase());
