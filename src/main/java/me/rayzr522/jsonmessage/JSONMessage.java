@@ -759,11 +759,16 @@ public class JSONMessage {
                 return legacyColor;
             }
 
-            if (this.color.startsWith("#") && ReflectionHelper.getVersion() < 16)
+            if (color == null) {
+                return null;
+            }
+
+            if (color.startsWith("#") && ReflectionHelper.getVersion() < 16) {
                 throw new IllegalStateException("Custom Hex colors can only be used in Minecraft 1.16 or newer!");
+            }
 
             try {
-                return ChatColor.valueOf(this.color.toUpperCase());
+                return ChatColor.valueOf(color.toUpperCase());
             } catch (Exception ex) {
                 return null;
             }
