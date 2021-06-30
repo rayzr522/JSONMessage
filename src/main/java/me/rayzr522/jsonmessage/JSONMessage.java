@@ -7,7 +7,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-
+import me.rayzr522.jsonmessage.compat.CompatManager;
+import me.rayzr522.jsonmessage.compat.PlayerConnection;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -25,6 +26,7 @@ import java.util.Vector;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class JSONMessage {
     private static final BiMap<ChatColor, String> stylesToNames;
+    private static final CompatManager compatManager = new CompatManager();
 
     static {
         ImmutableBiMap.Builder<ChatColor, String> builder = ImmutableBiMap.builder();
@@ -90,7 +92,12 @@ public class JSONMessage {
      * @param players The players you want to send it to
      */
     public static void actionbar(String message, Player... players) {
-        ReflectionHelper.sendPacket(ReflectionHelper.createActionbarPacket(ChatColor.translateAlternateColorCodes('&', message)), players);
+        compatManager.getPlayerConnection().sendPacket(
+                ReflectionHelper.createActionbarPacket(
+                        ChatColor.translateAlternateColorCodes('&', message)
+                ),
+                players
+        );
     }
 
     /**
@@ -161,7 +168,12 @@ public class JSONMessage {
 //            return;
         }
 
-        ReflectionHelper.sendPacket(ReflectionHelper.createTextPacket(toString()), players);
+        compatManager.getPlayerConnection().sendPacket(
+                ReflectionHelper.createTextPacket(
+                        toString()
+                ),
+                players
+        );
     }
 
     /**
@@ -173,8 +185,15 @@ public class JSONMessage {
      * @param players The players to send this to
      */
     public void title(int fadeIn, int stay, int fadeOut, Player... players) {
-        ReflectionHelper.sendPacket(ReflectionHelper.createTitleTimesPacket(fadeIn, stay, fadeOut), players);
-        ReflectionHelper.sendPacket(ReflectionHelper.createTitlePacket(toString()), players);
+        PlayerConnection playerConnectionCompat = compatManager.getPlayerConnection();
+        playerConnectionCompat.sendPacket(
+                ReflectionHelper.createTitleTimesPacket(fadeIn, stay, fadeOut),
+                players
+        );
+        playerConnectionCompat.sendPacket(
+                ReflectionHelper.createTitlePacket(toString()),
+                players
+        );
     }
 
     /**
@@ -183,7 +202,10 @@ public class JSONMessage {
      * @param players The players to send this to
      */
     public void subtitle(Player... players) {
-        ReflectionHelper.sendPacket(ReflectionHelper.createSubtitlePacket(toString()), players);
+        compatManager.getPlayerConnection().sendPacket(
+                ReflectionHelper.createSubtitlePacket(toString()),
+                players
+        );
     }
 
     /**

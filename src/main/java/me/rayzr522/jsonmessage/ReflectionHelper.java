@@ -1,7 +1,6 @@
 package me.rayzr522.jsonmessage;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -9,9 +8,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.UUID;
 
-class ReflectionHelper {
+public class ReflectionHelper {
 
     private static final String version;
     private static Constructor<?> chatComponentText;
@@ -28,9 +28,6 @@ class ReflectionHelper {
     private static Object enumActionTitle;
     private static Object enumActionSubtitle;
 
-    private static Field connection;
-    private static MethodHandle GET_HANDLE;
-    private static MethodHandle SEND_PACKET;
     private static MethodHandle STRING_TO_CHAT;
     private static boolean SETUP;
     private static int MAJOR_VER = -1;
@@ -42,8 +39,6 @@ class ReflectionHelper {
         try {
             MAJOR_VER = Integer.parseInt(version.split("_")[1]);
 
-            Class<?> NMS_PLAYER_CONNECTION;
-            Class<?> NMS_PACKET;
             Class<?> NMS_CHAT_COMPONENT_TEXT;
             Class<?> NMS_I_CHAT_BASE_COMPONENT;
             Class<?> NMS_CHAT_SERIALIZER;
@@ -53,8 +48,6 @@ class ReflectionHelper {
             Class<?> NMS_CHAT_MESSAGE_TYPE;
 
             if (MAJOR_VER <= 16) {
-                NMS_PLAYER_CONNECTION = getClass("{nms}.PlayerConnection");
-                NMS_PACKET = getClass("{nms}.Packet");
                 NMS_CHAT_COMPONENT_TEXT = getClass("{nms}.ChatComponentText");
                 NMS_I_CHAT_BASE_COMPONENT = getClass("{nms}.IChatBaseComponent");
                 NMS_PACKET_PLAY_OUT_CHAT = getClass("{nms}.PacketPlayOutChat");
@@ -72,8 +65,6 @@ class ReflectionHelper {
                     NMS_CHAT_MESSAGE_TYPE = null;
                 }
             } else {
-                NMS_PLAYER_CONNECTION = getClass("net.minecraft.server.PlayerConnection");
-                NMS_PACKET = getClass("net.minecraft.network.protocol.Packet");
                 NMS_CHAT_COMPONENT_TEXT = getClass("net.minecraft.network.chat.ChatComponentText");
                 NMS_I_CHAT_BASE_COMPONENT = getClass("net.minecraft.network.chat.IChatBaseComponent");
                 NMS_CHAT_SERIALIZER = getClass("net.minecraft.network.chat.ChatSerializer.IChatBaseComponent$ChatSerializer");
@@ -82,29 +73,12 @@ class ReflectionHelper {
                 NMS_CHAT_MESSAGE_TYPE = getClass("net.minecraft.network.chat.ChatMessageType");
             }
 
-
-            final Class<?> craftPlayer = getClass("{obc}.entity.CraftPlayer");
-            Method getHandle = craftPlayer.getMethod("getHandle");
-            Class<?> entityPlayer = getHandle.getReturnType();
-            try {
-                connection = entityPlayer.getDeclaredField("playerConnection");
-            } catch (NoSuchFieldException e) {
-                // in ver 1.17+ it's no longer called playerConnection, so we have to find it in a... less intuitive manner
-                connection = Arrays.stream(entityPlayer.getDeclaredFields())
-                        .filter(field -> field.getType().equals(NMS_PLAYER_CONNECTION))
-                        .findFirst()
-                        .orElseThrow(() -> new Error("Could not find PlayerConnection variable in EntityPlayer."));
-            }
-            Method sendPacket = connection.getType().getMethod("sendPacket", NMS_PACKET);
-
             chatComponentText = NMS_CHAT_COMPONENT_TEXT.getConstructor(String.class);
 
             final Class<?> iChatBaseComponent = NMS_I_CHAT_BASE_COMPONENT;
 
             Method stringToChat = NMS_CHAT_SERIALIZER.getMethod("a", String.class);
 
-            GET_HANDLE = MethodHandles.lookup().unreflect(getHandle);
-            SEND_PACKET = MethodHandles.lookup().unreflect(sendPacket);
             STRING_TO_CHAT = MethodHandles.lookup().unreflect(stringToChat);
 
             chatPacketContructor = NMS_PACKET_PLAY_OUT_CHAT.getConstructor();
@@ -132,24 +106,6 @@ class ReflectionHelper {
             e.printStackTrace();
             SETUP = false;
         }
-    }
-
-    static void sendPacket(Object packet, Player... players) {
-        assertIsSetup();
-
-        if (packet == null) {
-            return;
-        }
-
-        for (Player player : players) {
-            try {
-                SEND_PACKET.bindTo(connection.get(GET_HANDLE.bindTo(player).invoke())).invoke(packet);
-            } catch (Throwable e) {
-                System.err.println("Failed to send packet");
-                e.printStackTrace();
-            }
-        }
-
     }
 
     static Object createActionbarPacket(String message) {
@@ -275,6 +231,20 @@ class ReflectionHelper {
 
     public static Class<?> getClass(String path) throws ClassNotFoundException {
         return Class.forName(path.replace("{nms}", "net.minecraft.server." + version).replace("{obc}", "org.bukkit.craftbukkit." + version));
+    }
+
+    public static Optional<Field> findFieldByTypeName(Class<?> targetClass, String fieldTypeName) {
+        return Arrays.stream(targetClass.getDeclaredFields())
+                .filter(field -> field.getType().getName().equals(fieldTypeName))
+                .findFirst();
+    }
+
+    public static Field getFieldByTypeName(Class<?> targetClass, String fieldTypeName) {
+        return findFieldByTypeName(targetClass, fieldTypeName)
+                .orElseThrow(() -> new IllegalArgumentException(String.format(
+                        "Could not find field with type '%s' in class %s",
+                        fieldTypeName, targetClass.getCanonicalName()
+                )));
     }
 
     public static void setFieldValue(Field field, Object instance, Object value) {
