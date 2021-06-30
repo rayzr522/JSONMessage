@@ -92,12 +92,7 @@ public class JSONMessage {
      * @param players The players you want to send it to
      */
     public static void actionbar(String message, Player... players) {
-        compatManager.getPlayerConnection().sendPacket(
-                ReflectionHelper.createActionbarPacket(
-                        ChatColor.translateAlternateColorCodes('&', message)
-                ),
-                players
-        );
+        JSONMessage.create(message).actionbar(players);
     }
 
     /**
@@ -163,15 +158,10 @@ public class JSONMessage {
      * @param players The players you want to send this to
      */
     public void send(Player... players) {
-        if (ReflectionHelper.getVersion() >= 16) {
-//            ReflectionHelper.sendTextPacket(toString(), players);
-//            return;
-        }
+        Object component = ReflectionHelper.fromJson(toString());
 
         compatManager.getPlayerConnection().sendPacket(
-                ReflectionHelper.createTextPacket(
-                        toString()
-                ),
+                compatManager.getChatPacket().createTextPacket(component),
                 players
         );
     }
@@ -214,7 +204,12 @@ public class JSONMessage {
      * @param players The players you want to send this to
      */
     public void actionbar(Player... players) {
-        actionbar(toLegacy(), players);
+        Object component = ReflectionHelper.fromJson(toLegacy());
+
+        compatManager.getPlayerConnection().sendPacket(
+                compatManager.getChatPacket().createActionbarPacket(component),
+                players
+        );
     }
 
     /**
