@@ -20,7 +20,7 @@ For those of you using Maven, just add the following to your `pom.xml` file:
 <dependency>
     <groupId>me.rayzr522</groupId>
     <artifactId>jsonmessage</artifactId>
-    <version>1.2.1</version>
+    <version>1.3.0</version>
 </dependency>
 ```
 
@@ -35,14 +35,13 @@ repositories {
 
 ```gradle
 dependencies {
-    compile 'me.rayzr522:jsonmessage:1.2.1'
+    compile 'me.rayzr522:jsonmessage:1.3.0'
 }
 ```
 
 ### Other
 
-Otherwise, just drag n' drop the [single class file](https://github.com/Rayzr522/JSONMessage/blob/master/src/main/java/me/rayzr522/jsonmessage/JSONMessage.java) into your project.
-> If you are not yet using Maven, you should be. Really, you should. It's amazing.
+JSONMessage **no longer is drag-and-droppable**. You *must* use Maven or Gradle. This was a necessary measure as having everything in one class had become unmaintainable.
 
 ## Usage
 
