@@ -26,7 +26,7 @@ public class ChatComponentImpl17ToFuture implements ChatComponentCompat {
     public Object createComponent(String message) {
         try {
             return chatComponentText.newInstance(message);
-        } catch (Exception e) {
+        } catch (ReflectiveOperationException e) {
             e.printStackTrace();
             return null;
         }
