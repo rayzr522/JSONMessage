@@ -7,6 +7,14 @@ import java.util.Optional;
 public class ImplementationPicker<T> {
     private final List<Implementation<T>> implementations = new LinkedList<>();
 
+    /**
+     * Adds an implementation to the list of implementations that can be chosen from.
+     *
+     * @param minimumVersion minimum major version that this implementation applies to (inclusive)
+     * @param maximumVersion maximum major version that this implementation applies to (inclusive)
+     * @param factory factory method that can lazily construct an instance of this implementation
+     * @return This {@link ImplementationPicker} reference.
+     */
     public ImplementationPicker<T> addImplementation(int minimumVersion, int maximumVersion, ImplementationFactory<T> factory) {
         implementations.add(new Implementation<>(minimumVersion, maximumVersion, factory));
         return this;
@@ -19,14 +27,14 @@ public class ImplementationPicker<T> {
                 .map(impl -> {
                     try {
                         return impl.factory.get();
-                    } catch (Throwable throwable) {
-                        throwable.printStackTrace();
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
                         return null;
                     }
                 });
     }
 
-    public class Implementation<T> {
+    public static class Implementation<T> {
         private final int minimumVersion;
         private final int maximumVersion;
         private final ImplementationFactory<T> factory;
@@ -39,6 +47,6 @@ public class ImplementationPicker<T> {
     }
 
     public interface ImplementationFactory<T> {
-        T get() throws Throwable;
+        T get() throws Exception;
     }
 }
