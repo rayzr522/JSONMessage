@@ -12,10 +12,10 @@ public interface ChatComponentCompat {
     Object createComponent(String message);
 
     /**
-     * Attempts to convert a String representing a JSON message into a usable object
+     * Attempts to convert a JSON object into an NMS chat component
      *
-     * @param json The JSON to attempt to parse
-     * @return The object representing the text in JSON form, or <code>null</code> if something went wrong converting the String to JSON data
+     * @param json The JSON to create the chat component from
+     * @return The chat component, or <code>null</code> if something went wrong
      */
     Object fromJson(JsonObject json);
 }
