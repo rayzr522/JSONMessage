@@ -20,7 +20,7 @@ For those of you using Maven, just add the following to your `pom.xml` file:
 <dependency>
     <groupId>me.rayzr522</groupId>
     <artifactId>jsonmessage</artifactId>
-    <version>1.3.0</version>
+    <version>1.3.1</version>
 </dependency>
 ```
 
