@@ -26,7 +26,8 @@ public class PlayerConnectImpl17ToFuture implements PlayerConnectionCompat {
         playerConnectionField = ReflectionHelper.getFieldByTypeName(NMS_ENTITY_PLAYER, "PlayerConnection");
 
         Method getHandle = CRAFT_PLAYER.getMethod("getHandle");
-        Method sendPacket = playerConnectionField.getType().getMethod("sendPacket", NMS_PACKET);
+        Method sendPacket = ReflectionHelper.getMethodWithParameters(playerConnectionField.getType(), NMS_PACKET)
+                .orElseThrow(() -> new Error("Could not find sendPacket function for PlayerConnection"));
 
         GET_HANDLE = MethodHandles.lookup().unreflect(getHandle);
         SEND_PACKET = MethodHandles.lookup().unreflect(sendPacket);

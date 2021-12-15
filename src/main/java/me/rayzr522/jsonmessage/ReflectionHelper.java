@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -57,5 +58,11 @@ public class ReflectionHelper {
 
     public static int getVersion() {
         return MAJOR_VER;
+    }
+
+    public static Optional<Method> getMethodWithParameters(Class<?> mainClass, Class<?>... params) {
+        return Arrays.stream(mainClass.getMethods())
+                .filter(method -> Arrays.equals(method.getParameterTypes(), params))
+                .findFirst();
     }
 }
