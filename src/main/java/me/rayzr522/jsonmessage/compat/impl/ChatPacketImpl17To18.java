@@ -8,12 +8,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-public class ChatPacketImpl17ToFuture implements ChatPacketCompat {
+public class ChatPacketImpl17To18 implements ChatPacketCompat {
     private final Constructor<?> chatPacketContructor;
     private static Object enumChatMessageTypeMessage;
     private static Object enumChatMessageTypeActionbar;
 
-    public ChatPacketImpl17ToFuture() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public ChatPacketImpl17To18() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Class<?> NMS_I_CHAT_BASE_COMPONENT = ReflectionHelper.getClass("net.minecraft.network.chat.IChatBaseComponent");
         Class<?> NMS_CHAT_MESSAGE_TYPE = ReflectionHelper.getClass("net.minecraft.network.chat.ChatMessageType");
         Class<?> NMS_PACKET_PLAY_OUT_CHAT = ReflectionHelper.getClass("net.minecraft.network.protocol.game.PacketPlayOutChat");

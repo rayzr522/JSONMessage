@@ -16,7 +16,8 @@ public class CompatManager {
 
         chatComponentCompat = new ImplementationPicker<ChatComponentCompat>()
                 .addImplementation(8, 16, ChatComponentImpl8To16::new)
-                .addImplementation(17, Integer.MAX_VALUE, ChatComponentImpl17ToFuture::new)
+                .addImplementation(17, 18, ChatComponentImpl17To18::new)
+                .addImplementation(19, Integer.MAX_VALUE, ChatComponentImpl19ToFuture::new)
                 .getImplementation(version)
                 .orElseThrow(() -> new IllegalStateException(
                         "Missing ChatComponent implementation for major version: " + version
@@ -26,7 +27,8 @@ public class CompatManager {
                 .addImplementation(8, 11, ChatPacketImpl8To11::new)
                 .addImplementation(12, 15, ChatPacketImpl12To15::new)
                 .addImplementation(16, 16, ChatPacketImpl16::new)
-                .addImplementation(17, Integer.MAX_VALUE, ChatPacketImpl17ToFuture::new)
+                .addImplementation(17, 18, ChatPacketImpl17To18::new)
+                .addImplementation(17, Integer.MAX_VALUE, ChatPacketImpl19ToFuture::new)
                 .getImplementation(version)
                 .orElseThrow(() -> new IllegalStateException(
                         "Missing ChatPacket implementation for major version: " + version
