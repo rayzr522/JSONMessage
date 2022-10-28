@@ -28,7 +28,7 @@ public class CompatManager {
                 .addImplementation(12, 15, ChatPacketImpl12To15::new)
                 .addImplementation(16, 16, ChatPacketImpl16::new)
                 .addImplementation(17, 18, ChatPacketImpl17To18::new)
-                .addImplementation(17, Integer.MAX_VALUE, ChatPacketImpl19ToFuture::new)
+                .addImplementation(19, Integer.MAX_VALUE, ChatPacketImpl19ToFuture::new)
                 .getImplementation(version)
                 .orElseThrow(() -> new IllegalStateException(
                         "Missing ChatPacket implementation for major version: " + version
