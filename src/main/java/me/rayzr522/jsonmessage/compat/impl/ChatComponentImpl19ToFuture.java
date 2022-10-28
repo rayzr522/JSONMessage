@@ -19,7 +19,7 @@ public class ChatComponentImpl19ToFuture implements ChatComponentCompat {
         Class<?> IChatBaseComponent_ChatSerializer = ReflectionHelper.getClass("net.minecraft.network.chat.IChatBaseComponent$ChatSerializer");
 
         fromText = MethodHandles.lookup().unreflect(IChatBaseComponent.getMethod("b", String.class));
-        fromJson = MethodHandles.lookup().unreflect(IChatBaseComponent_ChatSerializer.getMethod("a", JsonElement.class, Type.class, JsonDeserializationContext.class));
+        fromJson = MethodHandles.lookup().unreflect(IChatBaseComponent_ChatSerializer.getMethod("a", String.class));
     }
 
     @Override
@@ -35,7 +35,7 @@ public class ChatComponentImpl19ToFuture implements ChatComponentCompat {
     @Override
     public Object fromJson(JsonObject json) {
         try {
-            return fromJson.invoke(json, null, null);
+            return fromJson.invoke(json.toString());
         } catch (Throwable e) {
             e.printStackTrace();
             return null;
